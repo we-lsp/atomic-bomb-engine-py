@@ -16,12 +16,17 @@ jobs:
       - name: 签出代码
         uses: actions/checkout@v3
 
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
       - name: 安装Rust
         uses: actions-rs/toolchain@v1
         with:
-            profile: minimal
-            toolchain: stable
-            override: true
+          profile: minimal
+          toolchain: stable
+          override: true
 
       - name: 构建python包
         run: |
