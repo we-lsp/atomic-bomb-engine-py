@@ -20,7 +20,7 @@ jobs:
         run: echo "PATH=$PATH:/home/qyzhg/.cargo/bin" >> $GITHUB_ENV
 
       - name: 构建python包
-        run: /home/qyzhg/python-envs/python3.12/bin/maturin build --release --target x86_64-apple-darwin
+        run: /home/qyzhg/python-envs/python3.12/bin/maturin build --release --target x86_64-apple-darwin --interpreter /home/qyzhg/python-envs/python3.12/bin/python
 
       - name: 上传构建的whl包到PyPI
         run: |
