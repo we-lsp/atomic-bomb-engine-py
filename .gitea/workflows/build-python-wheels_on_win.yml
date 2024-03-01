@@ -1,3 +1,8 @@
+name: Build Python Wheels on Windows
+on:
+  push:
+    branches:
+      - master
 jobs:
   build:
     runs-on: win_amd64
