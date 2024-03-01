@@ -9,12 +9,16 @@ jobs:
     steps:
       - name: 签出代码
         uses: actions/checkout@v3
+      - name: 设置 Rust 环境
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+          echo "C:\Users\Administrator\.cargo\bin" >> $GITHUB_PATH
       - name: 构建python包
         run: |
+          rustup default stable
           C:\Users\Administrator\rust-build\Scripts\maturin.exe build --release --interpreter python3.8 --interpreter python3.9 --interpreter python3.10 --interpreter python3.11 --interpreter python3.12
         env:
           PYTHONIOENCODING: utf-8
-          PATH: C:\Users\Administrator\.cargo\bin;${{ env.PATH }}
       - name: 上传构建的whl包到PyPI
         run: |
           C:\Users\Administrator\rust-build\Scripts\twine.exe upload --repository pypi --config-file C:\Users\Administrator\.pypirc .\target\wheels\*
