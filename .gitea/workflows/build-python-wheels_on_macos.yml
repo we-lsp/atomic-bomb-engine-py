@@ -1,41 +1,27 @@
-name: Build macOS Python Wheels on Linux
-
+name: Build Python Wheels on Linux
 on:
   push:
     branches:
       - master
-
 jobs:
-  build-wheels:
+  build:
     runs-on: linux_amd64
 
-    strategy:
-      matrix:
-        python-version: ["3.8.0", "3.9.0", "3.10.0", "3.11.0", "3.12.0"]
+    env:
+      http_proxy: http://10.0.0.54:1080
+      https_proxy: http://10.0.0.54:1080
+      all_proxy: socks5://10.0.0.54:1080
 
     steps:
       - name: 签出代码
         uses: actions/checkout@v3
 
-      - name: 安装 Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          default: true
-          profile: minimal
-          override: true
+      - name: 设置cargo环境变量
+        run: echo "PATH=$PATH:/home/qyzhg/.cargo/bin" >> $GITHUB_ENV
 
-      - name: 设置Python环境
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: 构建python包
+        run: /home/qyzhg/python-envs/python3.12/bin/maturin build --release --target x86_64-apple-darwin
 
-      - name: 安装依赖
+      - name: 上传构建的whl包到PyPI
         run: |
-          python -m pip install --upgrade pip
-          pip install cibuildwheel
-          pip install maturin
-
-      - name: 构建wheels
-        run: |
-          maturin build --release -i python3.8 -i python3.9 -i python3.10 -i python3.11 -i python3.12
+          /home/qyzhg/python-envs/python3.12/bin/twine upload --repository pypi --config-file /home/qyzhg/.pypirc ./target/wheels/*
