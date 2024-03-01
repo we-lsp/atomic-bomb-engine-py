@@ -13,6 +13,8 @@ jobs:
         run: echo "C:\Users\Administrator\.cargo\bin" >> $GITHUB_PATH
       - name: 设置 Rust 默认工具链
         run: rustup default stable
+      - name: 设置 MSVC
+        uses: ilammy/msvc-dev-cmd@v1
       - name: 构建python包
         run: |
           cargo --version
