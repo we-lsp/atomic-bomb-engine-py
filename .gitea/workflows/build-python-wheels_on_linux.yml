@@ -1,0 +1,24 @@
+name: Build Python Wheels on Windows
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: linux_amd64
+
+    env:
+      http_proxy: http://10.0.0.54:1080
+      https_proxy: http://10.0.0.54:1080
+      all_proxy: socks5://10.0.0.54:1080
+
+    steps:
+      - name: 签出代码
+        uses: actions/checkout@v3
+      - name: 构建python包
+        run: |
+          cargo --version
+          maturin build --release --interpreter ~/python-envs/python3.8/bin/python  --interpreter ~/python-envs/python3.9/bin/python  --interpreter ~/python-envs/python3.10/bin/python  --interpreter ~/python-envs/python3.11/bin/python  --interpreter ~/python-envs/python3.12/bin/python
+      - name: 上传构建的whl包到PyPI
+        run: |
+          twine upload --repository pypi --config-file /home/qyzhg/.pypirc ./target/wheels/*
