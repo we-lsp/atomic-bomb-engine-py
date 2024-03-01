@@ -1,18 +1,19 @@
 name: Build Python Wheels on Windows
-
 on:
   push:
     branches:
       - master
-
 jobs:
   build:
     runs-on: win_amd64
     steps:
       - name: 签出代码
         uses: actions/checkout@v3
-
       - name: 构建python包
         run: |
           C:\Users\Administrator\rust-build\Scripts\maturin.exe build --release --interpreter python3.8 --interpreter python3.9 --interpreter python3.10 --interpreter python3.11 --interpreter python3.12
-
+      - name: 上传Wheels包到PyPI
+        run: |
+          C:\Users\Administrator\rust-build\Scripts\twine.exe upload --repository pypi --config-file C:\Users\Administrator\.pypirc .\target\wheels\*
+        env:
+          WORKSPACE_DIR: ${{ env.GITEA_WORKSPACE }}
