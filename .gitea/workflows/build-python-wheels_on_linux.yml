@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: 设置cargo环境变量
-        run: echo "PATH=$PATH:/home/qyzhg/.cargo/bin" >> $GITEA_ENV
+        run: echo "PATH=$PATH:/home/qyzhg/.cargo/bin" >> $GITHUB_ENV
 
       - name: 构建python包
         run: /home/qyzhg/python-envs/python3.12/bin/maturin build --release --interpreter /home/qyzhg/python-envs/python3.8/bin/python  --interpreter /home/qyzhg/python-envs/python3.9/bin/python  --interpreter /home/qyzhg/python-envs/python3.10/bin/python  --interpreter /home/qyzhg/python-envs/python3.11/bin/python  --interpreter /home/qyzhg/python-envs/python3.12/bin/python
