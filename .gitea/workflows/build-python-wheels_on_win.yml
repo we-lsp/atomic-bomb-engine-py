@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: win_amd64
+#    Start-Process -FilePath "C:\Users\Administrator\act_runner.exe" -ArgumentList "daemon -c C:\Users\Administrator\.runner"
     steps:
       - name: 签出代码
         uses: actions/checkout@v3
