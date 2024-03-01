@@ -12,8 +12,10 @@ jobs:
       - name: 构建python包
         run: |
           C:\Users\Administrator\rust-build\Scripts\maturin.exe build --release --interpreter python3.8 --interpreter python3.9 --interpreter python3.10 --interpreter python3.11 --interpreter python3.12
-      - name: 上传Wheels包到PyPI
+        env:
+          PYTHONIOENCODING: utf-8
+      - name: 上传构建的whl包到PyPI
         run: |
           C:\Users\Administrator\rust-build\Scripts\twine.exe upload --repository pypi --config-file C:\Users\Administrator\.pypirc .\target\wheels\*
         env:
-          WORKSPACE_DIR: ${{ env.GITEA_WORKSPACE }}
+          PYTHONIOENCODING: utf-8
