@@ -7,6 +7,12 @@ jobs:
   build:
     runs-on: win_amd64
 #    Start-Process -FilePath "C:\Users\Administrator\act_runner.exe" -ArgumentList "daemon -c C:\Users\Administrator\.runner"
+
+    env:
+      http_proxy: http://10.0.0.54:1080
+      https_proxy: http://10.0.0.54:1080
+      all_proxy: socks5://10.0.0.54:1080
+
     steps:
       - name: 签出代码
         uses: actions/checkout@v3
