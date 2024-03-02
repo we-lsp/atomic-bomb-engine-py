@@ -20,7 +20,9 @@ verbose = false,
 json_str=None,
 form_data_str=None,
 headers=None,
-cookie=None))]
+cookie=None,
+should_prevent=false)
+)]
 fn run(
     py: Python,
     url: String,
@@ -32,7 +34,9 @@ fn run(
     json_str: Option<String>,
     form_data_str: Option<String>,
     headers: Option<Vec<String>>,
-    cookie: Option<String>) -> PyResult<PyObject> {
+    cookie: Option<String>,
+    should_prevent:bool,
+) -> PyResult<PyObject> {
 
     let rt = Runtime::new().unwrap();
     let result = rt.block_on(async move {
@@ -47,6 +51,7 @@ fn run(
             form_data_str,
             headers,
             cookie,
+            should_prevent
         ).await
     });
 
@@ -85,7 +90,9 @@ verbose = false,
 json_str=None,
 form_data_str=None,
 headers=None,
-cookie=None))]
+cookie=None,
+should_prevent=false
+))]
 fn run_async(
     py: Python,
     url: String,
@@ -97,7 +104,8 @@ fn run_async(
     json_str: Option<String>,
     form_data_str: Option<String>,
     headers: Option<Vec<String>>,
-    cookie: Option<String>
+    cookie: Option<String>,
+    should_prevent:bool,
 ) -> PyResult<&PyAny> {
     future_into_py(py, async move {
         let result = core::execute::run(
@@ -111,6 +119,7 @@ fn run_async(
             form_data_str,
             headers,
             cookie,
+            should_prevent
         ).await;
 
         Python::with_gil(|py| match result {

@@ -25,9 +25,9 @@ checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
 
 [[package]]
 name = "atomic-bomb-engine"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbec0baa7cc0fd81edd19728560c873ab308f0483d35137dfc2590d2b52e96ec"
+checksum = "e9c4747f01ae84a316a758d9fbdd262e99f44ab3ebda5440f7e43fb29732fa2e"
 dependencies = [
  "anyhow",
  "histogram",
@@ -38,11 +38,12 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "winapi",
 ]
 
 [[package]]
 name = "atomic-bomb-engine-py"
-version = "0.2.18"
+version = "0.2.19"
 dependencies = [
  "atomic-bomb-engine",
  "pyo3",
@@ -1319,6 +1320,28 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "winapi"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419"
+dependencies = [
+ "winapi-i686-pc-windows-gnu",
+ "winapi-x86_64-pc-windows-gnu",
+]
+
+[[package]]
+name = "winapi-i686-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
+
+[[package]]
+name = "winapi-x86_64-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "windows-sys"
