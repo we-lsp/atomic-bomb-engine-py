@@ -1,6 +1,6 @@
 [package]
 name = "atomic-bomb-engine-py"
-version = "0.2.15"
+version = "0.2.16"
 edition = "2021"
 
 [lib]
@@ -11,9 +11,12 @@ crate-type = ["cdylib"]
 
 [dependencies]
 atomic-bomb-engine = "0.2.2"
-pyo3 = "0.20.3"
 tokio = "1.36.0"
 pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime"] }
 
 [build]
 rustflags = ["-C", "target-feature=+crt-static"]
+
+[dependencies.pyo3]
+version = "0.20.3"
+features = ["extension-module"]
