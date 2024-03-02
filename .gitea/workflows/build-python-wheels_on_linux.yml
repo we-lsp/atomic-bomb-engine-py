@@ -2,7 +2,7 @@ name: Build Python Wheels on Linux
 on:
   push:
     branches:
-      - master
+      - release
 jobs:
   build:
     runs-on: linux_amd64
