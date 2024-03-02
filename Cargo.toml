@@ -14,3 +14,6 @@ atomic-bomb-engine = "0.2.2"
 pyo3 = "0.20.3"
 tokio = "1.36.0"
 pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime"] }
+
+[build]
+rustflags = ["-C", "target-feature=+crt-static"]
