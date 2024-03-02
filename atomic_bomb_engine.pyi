@@ -12,7 +12,8 @@ def run(
                 json_str: str | None = None,
                 form_data_str: str | None = None,
                 headers: list[str] | None = None,
-                cookie: str | None = None) -> dict:
+                cookie: str | None = None,
+                should_prevent:bool = False) -> dict:
         """
         同步启动压测引擎
         :param url: 压测地址
@@ -25,6 +26,7 @@ def run(
         :param form_data_str: 使用form方式发送请求
         :param headers: 添加请求头
         :param cookie: 添加cookie
+        :param should_prevent: 实验性功能！压测过程中是否阻止休眠，此参数为true时，需要使用管理员权限运行才有效果，使用此功能会增加电脑功耗，但在无人值守时会非常有用
         :return:
         """
 
@@ -38,7 +40,8 @@ async def run_async(
                 json_str: str | None = None,
                 form_data_str: str | None = None,
                 headers: str | None = None,
-                cookie: str | None = None) -> dict:
+                cookie: str | None = None,
+                should_prevent:bool = False) -> dict:
         """
         异步启动压测引擎
         :param url: 压测地址
@@ -51,6 +54,7 @@ async def run_async(
         :param form_data_str: 使用form方式发送请求
         :param headers: 添加请求头
         :param cookie: 添加cookie
+        :param should_prevent: 实验性功能！压测过程中是否阻止休眠，此参数为true时，需要使用管理员权限运行才有效果，使用此功能会增加电脑功耗，但在无人值守时会非常有用
         :return:
         """
 

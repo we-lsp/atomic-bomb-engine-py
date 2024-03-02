@@ -1,6 +1,6 @@
 [package]
 name = "atomic-bomb-engine-py"
-version = "0.2.19"
+version = "0.2.20"
 edition = "2021"
 
 [lib]
