@@ -21,7 +21,8 @@ json_str=None,
 form_data_str=None,
 headers=None,
 cookie=None,
-should_prevent=false)
+should_prevent=false,
+assert_json_path=None)
 )]
 fn run(
     py: Python,
@@ -36,6 +37,7 @@ fn run(
     headers: Option<Vec<String>>,
     cookie: Option<String>,
     should_prevent:bool,
+    assert_json_path: Option<String>,
 ) -> PyResult<PyObject> {
 
     let rt = Runtime::new().unwrap();
@@ -51,7 +53,8 @@ fn run(
             form_data_str,
             headers,
             cookie,
-            should_prevent
+            should_prevent,
+            assert_json_path
         ).await
     });
 
@@ -91,7 +94,8 @@ json_str=None,
 form_data_str=None,
 headers=None,
 cookie=None,
-should_prevent=false
+should_prevent=false,
+assert_json_path=None,
 ))]
 fn run_async(
     py: Python,
@@ -106,6 +110,7 @@ fn run_async(
     headers: Option<Vec<String>>,
     cookie: Option<String>,
     should_prevent:bool,
+    assert_json_path: Option<String>,
 ) -> PyResult<&PyAny> {
     future_into_py(py, async move {
         let result = core::execute::run(
@@ -119,7 +124,8 @@ fn run_async(
             form_data_str,
             headers,
             cookie,
-            should_prevent
+            should_prevent,
+            assert_json_path
         ).await;
 
         Python::with_gil(|py| match result {
