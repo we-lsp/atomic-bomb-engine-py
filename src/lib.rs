@@ -200,10 +200,20 @@ impl StatusListenIter {
     }
 }
 
+#[pyfunction]
+fn assert_option(py: Python, jsonpath: String, reference_object: PyObject) -> PyResult<PyObject>{
+    let dict = PyDict::new(py);
+    dict.set_item("jsonpath", jsonpath)?;
+    dict.set_item("reference_object", reference_object)?;
+    Ok(dict.to_object(py))
+}
+
+
 #[pymodule]
 fn atomic_bomb_engine(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(run, m)?)?;
     m.add_function(wrap_pyfunction!(run_async, m)?)?;
     m.add_class::<StatusListenIter>()?;
+    m.add_function(wrap_pyfunction!(assert_option, m)?)?;
     Ok(())
 }
