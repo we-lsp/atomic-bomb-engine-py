@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 use tokio;
-use pyo3::types::{PyDict};
+use pyo3::types::{PyDict, PyAny};
 use tokio::runtime::Runtime;
 use ::atomic_bomb_engine as abe;
 use abe::{core};
@@ -8,6 +8,8 @@ use pyo3_asyncio::tokio::future_into_py;
 use pyo3_asyncio;
 use serde_json;
 use serde_json::Value;
+use serde_pyobject::{from_pyobject};
+
 
 mod utils;
 
@@ -25,7 +27,7 @@ headers=None,
 cookie=None,
 should_prevent=false,
 assert_json_path=None,
-assert_reference_str=None)
+assert_reference_obj=None)
 )]
 fn run(
     py: Python,
@@ -41,16 +43,20 @@ fn run(
     cookie: Option<String>,
     should_prevent:bool,
     assert_json_path: Option<String>,
-    assert_reference_str: Option<String>
+    assert_reference_obj: Option<PyObject>
 ) -> PyResult<PyObject> {
-    let assert_reference_obj: Option<Value> = match assert_reference_str {
-        None => None,
-        Some(s) => match serde_json::from_str(&s) {
-            Ok(val) => Some(val),
-            Err(e) => {
-                return  Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
-            },
-        },
+    let assert_reference_value: Option<Value> = match assert_reference_obj {
+        None => {
+            None
+        }
+        Some(obj) => {
+            match from_pyobject(obj.as_ref(py)){
+                Ok(val) => val,
+                Err(e) => {
+                   return   Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
+                },
+            }
+        }
     };
     let rt = Runtime::new().unwrap();
     let result = rt.block_on(async move {
@@ -67,7 +73,7 @@ fn run(
             cookie,
             should_prevent,
             assert_json_path,
-            assert_reference_obj
+            assert_reference_value
         ).await
     });
 
@@ -109,7 +115,7 @@ headers=None,
 cookie=None,
 should_prevent=false,
 assert_json_path=None,
-assert_reference_str=None,
+assert_reference_obj=None,
 ))]
 fn run_async(
     py: Python,
@@ -125,16 +131,20 @@ fn run_async(
     cookie: Option<String>,
     should_prevent:bool,
     assert_json_path: Option<String>,
-    assert_reference_str: Option<String>
+    assert_reference_obj: Option<PyObject>
 ) -> PyResult<&PyAny> {
-    let assert_reference_obj: Option<Value> = match assert_reference_str {
-        None => None,
-        Some(s) => match serde_json::from_str(&s) {
-            Ok(val) => Some(val),
-            Err(e) => {
-                return  Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
-            },
-        },
+    let assert_reference_value: Option<Value> = match assert_reference_obj {
+        None => {
+            None
+        }
+        Some(obj) => {
+            match from_pyobject(obj.as_ref(py)){
+                Ok(val) => val,
+                Err(e) => {
+                    return   Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
+                },
+            }
+        }
     };
     future_into_py(py, async move {
         let result = core::execute::run(
@@ -150,7 +160,7 @@ fn run_async(
             cookie,
             should_prevent,
             assert_json_path,
-            assert_reference_obj
+            assert_reference_value
         ).await;
 
         Python::with_gil(|py| match result {
@@ -192,7 +202,7 @@ impl StatusListenIter {
         Ok(slf)
     }
 
-    fn __next__(mut slf: PyRefMut<Self>, py: Python) -> PyResult<Option<PyObject>> {
+    fn __next__(mut _slf: PyRefMut<Self>, py: Python) -> PyResult<Option<PyObject>> {
         let should_stop = *core::status_share::SHOULD_STOP.lock();
         if should_stop {
             return Ok(None); // 停止迭代

@@ -44,12 +44,13 @@ dependencies = [
 
 [[package]]
 name = "atomic-bomb-engine-py"
-version = "0.2.24"
+version = "0.2.25"
 dependencies = [
  "atomic-bomb-engine",
  "pyo3",
  "pyo3-asyncio",
  "serde",
+ "serde-pyobject",
  "serde_json",
  "tokio",
 ]
@@ -948,6 +949,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fb1c873e1b9b056a4dc4c0c198b24c3ffa059243875552b2bd0933b1aee4ce2"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-pyobject"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5160bb6a2f0dd7738e21a28f8314d74a14db44f34413b2c57ecd23d31135e496"
+dependencies = [
+ "pyo3",
+ "serde",
 ]
 
 [[package]]

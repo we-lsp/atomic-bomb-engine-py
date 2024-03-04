@@ -15,7 +15,7 @@ def run(
                 cookie: str | None = None,
                 should_prevent:bool = False,
                 assert_json_path:str| None = None,
-                assert_reference_str:str| None = None,
+                assert_reference_obj:any | None = None,
 ) -> dict:
     """
     同步启动压测引擎
@@ -31,7 +31,7 @@ def run(
     :param cookie: 添加cookie
     :param should_prevent: 实验性功能！压测过程中是否阻止休眠，此参数为true时，需要使用管理员权限运行才有效果，使用此功能会增加电脑功耗，但在无人值守时会非常有用
     :param assert_json_path: 要提取值的jsonpath
-    :param assert_reference_str:
+    :param assert_reference_obj: 断言的参照值，如果使用jsonpath提取出来的是一个json，直接用字典传一个json，如果是一个值，传入具体的值即可
     :return:
     """
 
@@ -48,7 +48,7 @@ async def run_async(
                 cookie: str | None = None,
                 should_prevent:bool = False,
                 assert_json_path:str| None = None,
-                assert_reference_str:str| None = None,
+                assert_reference_obj:any| None = None,
 ) -> dict:
     """
     异步启动压测引擎
@@ -64,7 +64,7 @@ async def run_async(
     :param cookie: 添加cookie
     :param should_prevent: 实验性功能！压测过程中是否阻止休眠，此参数为true时，需要使用管理员权限运行才有效果，使用此功能会增加电脑功耗，但在无人值守时会非常有用
     :param assert_json_path: 要提取值的jsonpath
-    :param assert_reference_str:
+    :param assert_reference_obj: 断言的参照值，如果使用jsonpath提取出来的是一个json，直接用字典传一个json，如果是一个值，传入具体的值即可
     :return:
     """
 
