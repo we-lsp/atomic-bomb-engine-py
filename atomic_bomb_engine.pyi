@@ -2,6 +2,12 @@ from typing import Iterator, Optional
 from _pyo3_runtime import PyAny
 from typing import List, Dict, Any
 
+def assert_option(jsonpath: str, reference_object: any) -> Dict[str, Any]:
+    """
+    生成assert option
+    :param jsonpath: jsonpath取值地址
+    :param reference_object: 断言的值
+    """
 
 def run(
         url: str,
@@ -30,7 +36,7 @@ def run(
     :param headers: 添加请求头
     :param cookie: 添加cookie
     :param should_prevent: 实验性功能！压测过程中是否阻止休眠，此参数为true时，需要使用管理员权限运行才有效果，使用此功能会增加电脑功耗，但在无人值守时会非常有用
-    :param assert_options: 断言，传入一个字典列表，key必须包含两个：jsonpath和reference_object e.g. [{"jsonpath": "$.code", "reference_object": 429}, {"jsonpath": "$.code", "reference_object": "300"}]
+    :param assert_options: 断言，传入一个字典列表，key必须包含两个：jsonpath和reference_object e.g. [{"jsonpath": "$.code", "reference_object": 429}, {"jsonpath": "$.code", "reference_object": "300"}]， 也可以使用本包中的assert_option方法生成option
     :return: Dict
     """
 
@@ -61,7 +67,7 @@ async def run_async(
     :param headers: 添加请求头
     :param cookie: 添加cookie
     :param should_prevent: 实验性功能！压测过程中是否阻止休眠，此参数为true时，需要使用管理员权限运行才有效果，使用此功能会增加电脑功耗，但在无人值守时会非常有用
-    :param assert_options: 断言，传入一个字典列表，key必须包含两个：jsonpath和reference_object e.g. [{"jsonpath": "$.code", "reference_object": 429}, {"jsonpath": "$.code", "reference_object": "300"}]
+    :param assert_options: 断言，传入一个字典列表，key必须包含两个：jsonpath和reference_object e.g. [{"jsonpath": "$.code", "reference_object": 429}, {"jsonpath": "$.code", "reference_object": "300"}]， 也可以使用本包中的assert_option方法生成option
     :return: Dict
     """
 
