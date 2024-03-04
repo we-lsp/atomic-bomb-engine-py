@@ -3,7 +3,7 @@ use tokio;
 use pyo3::types::{PyDict, PyAny, PyList};
 use tokio::runtime::Runtime;
 use ::atomic_bomb_engine as abe;
-use abe::{core, models};
+use abe::{core};
 use pyo3_asyncio::tokio::future_into_py;
 use pyo3_asyncio;
 use serde_json;
@@ -75,10 +75,10 @@ fn run(
             dict.set_item("err_count", test_result.err_count)?;
             dict.set_item("total_data_kb", test_result.total_data_kb)?;
             dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
-            let http_error_dict = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
-            dict.set_item("http_errors", http_error_dict)?;
-            let assert_error_dict = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
-            dict.set_item("assert_errors", assert_error_dict)?;
+            let http_error_list = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
+            dict.set_item("http_errors", http_error_list)?;
+            let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+            dict.set_item("assert_errors", assert_error_list)?;
             dict.set_item("timestamp", test_result.timestamp)?;
             Ok(dict.into())
         },
@@ -148,10 +148,10 @@ fn run_async<'a>(
                 dict.set_item("err_count", test_result.err_count)?;
                 dict.set_item("total_data_kb", test_result.total_data_kb)?;
                 dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
-                let http_error_dict = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
-                dict.set_item("http_errors", http_error_dict)?;
-                let assert_error_dict = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
-                dict.set_item("assert_errors", assert_error_dict)?;
+                let http_error_list = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
+                dict.set_item("http_errors", http_error_list)?;
+                let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+                dict.set_item("assert_errors", assert_error_list)?;
                 dict.set_item("timestamp", test_result.timestamp)?;
                 Ok(dict.to_object(py))
             },
@@ -194,10 +194,10 @@ impl StatusListenIter {
             dict.set_item("err_count", test_result.err_count)?;
             dict.set_item("total_data_kb", test_result.total_data_kb)?;
             dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
-            let http_error_dict = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
-            dict.set_item("http_errors", http_error_dict)?;
-            let assert_error_dict = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
-            dict.set_item("assert_errors", assert_error_dict)?;
+            let http_error_list = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
+            dict.set_item("http_errors", http_error_list)?;
+            let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+            dict.set_item("assert_errors", assert_error_list)?;
             dict.set_item("timestamp", test_result.timestamp)?;
             Ok(Some(dict.to_object(py)))
         } else {
