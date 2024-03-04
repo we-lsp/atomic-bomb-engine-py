@@ -1,14 +1,12 @@
 use pyo3::prelude::*;
 use tokio;
-use pyo3::types::{PyDict, PyAny};
+use pyo3::types::{PyDict, PyAny, PyList};
 use tokio::runtime::Runtime;
 use ::atomic_bomb_engine as abe;
-use abe::{core};
+use abe::{core, models};
 use pyo3_asyncio::tokio::future_into_py;
 use pyo3_asyncio;
 use serde_json;
-use serde_json::Value;
-use serde_pyobject::{from_pyobject};
 
 
 mod utils;
@@ -26,8 +24,7 @@ form_data_str=None,
 headers=None,
 cookie=None,
 should_prevent=false,
-assert_json_path=None,
-assert_reference_obj=None)
+assert_options=None)
 )]
 fn run(
     py: Python,
@@ -42,22 +39,9 @@ fn run(
     headers: Option<Vec<String>>,
     cookie: Option<String>,
     should_prevent:bool,
-    assert_json_path: Option<String>,
-    assert_reference_obj: Option<PyObject>
+    assert_options: Option<&PyList>
 ) -> PyResult<PyObject> {
-    let assert_reference_value: Option<Value> = match assert_reference_obj {
-        None => {
-            None
-        }
-        Some(obj) => {
-            match from_pyobject(obj.as_ref(py)){
-                Ok(val) => val,
-                Err(e) => {
-                   return   Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
-                },
-            }
-        }
-    };
+    let options = utils::parse_assert_options::new(py, assert_options)?;
     let rt = Runtime::new().unwrap();
     let result = rt.block_on(async move {
         core::execute::run(
@@ -72,8 +56,7 @@ fn run(
             headers,
             cookie,
             should_prevent,
-            assert_json_path,
-            assert_reference_value
+            options
         ).await
     });
 
@@ -114,11 +97,10 @@ form_data_str=None,
 headers=None,
 cookie=None,
 should_prevent=false,
-assert_json_path=None,
-assert_reference_obj=None,
+assert_options=None,
 ))]
-fn run_async(
-    py: Python,
+fn run_async<'a>(
+    py: Python<'a>,
     url: String,
     method: String,
     test_duration_secs: u64,
@@ -129,23 +111,10 @@ fn run_async(
     form_data_str: Option<String>,
     headers: Option<Vec<String>>,
     cookie: Option<String>,
-    should_prevent:bool,
-    assert_json_path: Option<String>,
-    assert_reference_obj: Option<PyObject>
-) -> PyResult<&PyAny> {
-    let assert_reference_value: Option<Value> = match assert_reference_obj {
-        None => {
-            None
-        }
-        Some(obj) => {
-            match from_pyobject(obj.as_ref(py)){
-                Ok(val) => val,
-                Err(e) => {
-                    return   Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
-                },
-            }
-        }
-    };
+    should_prevent: bool,
+    assert_options: Option<&'a PyList>,
+) -> PyResult<&'a PyAny> {
+    let options = utils::parse_assert_options::new(py, assert_options)?;
     future_into_py(py, async move {
         let result = core::execute::run(
             &url,
@@ -159,8 +128,7 @@ fn run_async(
             headers,
             cookie,
             should_prevent,
-            assert_json_path,
-            assert_reference_value
+            options
         ).await;
 
         Python::with_gil(|py| match result {
