@@ -77,6 +77,8 @@ fn run(
             dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
             let http_error_dict = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
             dict.set_item("http_errors", http_error_dict)?;
+            let assert_error_dict = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+            dict.set_item("assert_errors", assert_error_dict)?;
             dict.set_item("timestamp", test_result.timestamp)?;
             Ok(dict.into())
         },
@@ -148,6 +150,8 @@ fn run_async<'a>(
                 dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
                 let http_error_dict = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
                 dict.set_item("http_errors", http_error_dict)?;
+                let assert_error_dict = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+                dict.set_item("assert_errors", assert_error_dict)?;
                 dict.set_item("timestamp", test_result.timestamp)?;
                 Ok(dict.to_object(py))
             },
@@ -192,6 +196,8 @@ impl StatusListenIter {
             dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
             let http_error_dict = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
             dict.set_item("http_errors", http_error_dict)?;
+            let assert_error_dict = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+            dict.set_item("assert_errors", assert_error_dict)?;
             dict.set_item("timestamp", test_result.timestamp)?;
             Ok(Some(dict.to_object(py)))
         } else {
