@@ -265,49 +265,28 @@ impl BatchListenIter {
 
 #[pyfunction]
 #[pyo3(signature = (
-url,
-method,
-test_duration_secs = 1,
-concurrent_requests = 1,
-timeout_secs = 30,
-verbose = false,
-json_str=None,
-form_data_str=None,
-headers=None,
-cookie=None,
+test_duration_secs,
+concurrent_requests,
+api_endpoints,
+verbose=false,
 should_prevent=false,
-assert_options=None,
 ))]
 fn batch_async<'a>(
     py: Python<'a>,
-    url: String,
-    method: String,
     test_duration_secs: u64,
-    concurrent_requests: i32,
-    timeout_secs: u64,
+    concurrent_requests: usize,
+    api_endpoints: &'a PyList,
     verbose: bool,
-    json_str: Option<String>,
-    form_data_str: Option<String>,
-    headers: Option<Vec<String>>,
-    cookie: Option<String>,
     should_prevent: bool,
-    assert_options: Option<&'a PyList>,
 ) -> PyResult<&'a PyAny> {
-    let options = utils::parse_assert_options::new(py, assert_options)?;
+    let endpoints = utils::parse_api_endpoints::new(py, api_endpoints)?;
     future_into_py(py, async move {
-        let result = core::execute::run(
-            &url,
-            test_duration_secs,
+        let result = core::batch::batch(
+           test_duration_secs,
             concurrent_requests,
-            timeout_secs,
             verbose,
-            &method,
-            json_str,
-            form_data_str,
-            headers,
-            cookie,
             should_prevent,
-            options
+            endpoints
         ).await;
 
         Python::with_gil(|py| match result {
@@ -345,5 +324,6 @@ fn atomic_bomb_engine(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<StatusListenIter>()?;
     m.add_function(wrap_pyfunction!(assert_option, m)?)?;
     m.add_class::<BatchListenIter>()?;
+    m.add_function(wrap_pyfunction!(batch_async, m)?)?;
     Ok(())
 }
