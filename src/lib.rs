@@ -309,6 +309,8 @@ fn batch_async<'a>(
                 let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
                 dict.set_item("assert_errors", assert_error_list)?;
                 dict.set_item("timestamp", test_result.timestamp)?;
+                let api_results = utils::create_api_results_dict::create_api_results_dict(py, test_result.api_results)?;
+                dict.set_item("api_results", api_results)?;
                 Ok(dict.to_object(py))
             },
             Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e))),

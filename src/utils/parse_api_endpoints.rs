@@ -16,83 +16,60 @@ pub fn new(
             let name: String = match dict.get_item("name") {
                 Ok(name) => match name {
                     None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "name不能为空".to_string(),
-                        ))
+                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("name不能为空".to_string()))
                     }
                     Some(name) => name.to_string(),
                 },
                 Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
 
             let url: String = match dict.get_item("url") {
                 Ok(url) => match url {
                     None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "url不能为空".to_string(),
-                        ))
+                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("url不能为空".to_string()))
                     }
                     Some(url) => url.to_string(),
                 },
                 Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
 
             let method: String = match dict.get_item("method") {
                 Ok(method) => match method {
                     None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("method不能为空".to_string(),))
+                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("method不能为空".to_string()))
                     }
                     Some(method) => method.to_string(),
                 },
                 Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
 
             let timeout_secs: u64 = match dict.get_item("timeout_secs") {
                 Ok(timeout_secs) => match timeout_secs {
                     None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "timeout_secs不能为空".to_string(),
-                        ))
+                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("timeout_secs不能为空".to_string()))
                     }
                     Some(timeout_secs) => timeout_secs.to_string().parse()?,
                 },
                 Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
 
             let weight: u32 = match dict.get_item("weight") {
                 Ok(weight) => match weight {
                     None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "weight不能为空".to_string(),
-                        ))
+                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>("weight不能为空".to_string()))
                     }
-                    Some(weight) => timeout_secs.to_string().parse()?,
+                    Some(weight) => weight.to_string().parse()?,
                 },
                 Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
 
