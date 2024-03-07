@@ -240,6 +240,9 @@ impl BatchListenIter {
         }
         let mut queue = core::status_share::RESULTS_QUEUE.lock();
         if let Some(test_result) = queue.pop_front() {
+            if test_result.total_data_kb == 0.0{
+              return   Ok(Some(py.None()))
+            };
             let dict = PyDict::new(py);
             dict.set_item("total_duration", test_result.total_duration)?;
             dict.set_item("success_rate", test_result.success_rate)?;
