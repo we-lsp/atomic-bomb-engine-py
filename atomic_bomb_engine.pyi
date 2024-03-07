@@ -9,6 +9,30 @@ def assert_option(jsonpath: str, reference_object: any) -> Dict[str, Any]:
     :param reference_object: 断言的值
     """
 
+def endpoint(
+         name: str,
+         url: str,
+         method: str,
+         timeout_secs: int,
+         weight: int,
+         json: Dict| None = None,
+         headers: Dict| None = None,
+         cookies: str | None = None,
+         assert_options: List| None = None
+         ) -> Dict[str, Any]:
+    """
+    生成endpoint
+    :param name: 接口名称
+    :param url: 接口地址
+    :param method: 请求方法
+    :param timeout_secs: 超时时间(秒)
+    :param weight 权重
+    :param json: 请求json
+    :param headers: 请求头
+    :param cookies: cookie
+    :assert_options: 断言参数
+    """
+
 def run(
         url: str,
         method: str,
@@ -75,7 +99,7 @@ async def run_async(
 class StatusListenIter:
     """
     实例化后返回一个监听器的生成器
-    必须在压测的时候进行迭代，否则无法获取到数据
+    必须在单接口压测的时候进行迭代，否则无法获取到数据
     建议如果没有获取到数据的的时候，添加一个sleep，不需要太密集的查询，引擎的生产速度是1秒一次
     e.g.
         async def listen():
@@ -87,3 +111,36 @@ class StatusListenIter:
     """
     def __iter__(self) -> "StatusListenIter": ...
     def __next__(self) -> Optional[PyAny]: ...
+
+
+class BatchListenIter:
+    """
+    实例化后返回一个监听器的生成器
+    必须在批量压测的时候进行迭代，否则无法获取到数据
+    建议如果没有获取到数据的的时候，添加一个sleep，不需要太密集的查询，引擎的生产速度是1秒一次
+    e.g.
+        async def listen():
+            for message in performance_engine.BatchListenIter():
+                if message:
+                    # 在这里处理业务逻辑，可以落库或者推送ws的操作
+                    print(message)
+            await asyncio.sleep(0.3)
+    """
+    def __iter__(self) -> "BatchListenIter": ...
+    def __next__(self) -> Optional[PyAny]: ...
+
+
+async def batch_async(
+             test_duration_secs: int,
+             concurrent_requests: int,
+             api_endpoints:List[Dict],
+             verbose:bool=False,
+             should_prevent:bool=False) ->Dict:
+    """
+        批量压测
+        :param test_duration_secs: 测试持续时间
+        :param concurrent_requests: 并发数
+        :param api_endpoints: 接口信息
+        :param verbose: 打印详细信息
+        :param should_prevent: 是否禁用睡眠
+    """
