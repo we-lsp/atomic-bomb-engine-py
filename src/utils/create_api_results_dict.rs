@@ -15,6 +15,7 @@ pub fn create_api_results_dict(py: Python, api_results: Vec<ApiResult>) -> PyRes
         res_dict.set_item("name", result.name)?;
         res_dict.set_item("url", result.url)?;
         res_dict.set_item("success_rate", result.success_rate)?;
+        res_dict.set_item("error_rate", result.error_rate)?;
         res_dict.set_item("median_response_time", result.median_response_time)?;
         res_dict.set_item("response_time_95", result.response_time_95)?;
         res_dict.set_item("response_time_99", result.response_time_99)?;

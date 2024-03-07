@@ -1,12 +1,17 @@
+use std::fs::metadata;
+use std::io::Error;
 use pyo3::prelude::*;
 use tokio;
 use pyo3::types::{PyDict, PyAny, PyList};
 use tokio::runtime::Runtime;
 use ::atomic_bomb_engine as abe;
 use abe::{core};
+use pyo3::exceptions::PyBaseException;
+use pyo3::impl_::pyclass::dict_offset;
 use pyo3_asyncio::tokio::future_into_py;
 use pyo3_asyncio;
 use serde_json;
+use serde_json::json;
 
 
 mod utils;
@@ -238,6 +243,7 @@ impl BatchListenIter {
             let dict = PyDict::new(py);
             dict.set_item("total_duration", test_result.total_duration)?;
             dict.set_item("success_rate", test_result.success_rate)?;
+            dict.set_item("error_rate", test_result.error_rate)?;
             dict.set_item("median_response_time", test_result.median_response_time)?;
             dict.set_item("response_time_95", test_result.response_time_95)?;
             dict.set_item("response_time_99", test_result.response_time_99)?;
@@ -294,6 +300,7 @@ fn batch_async<'a>(
                 let dict = PyDict::new(py);
                 dict.set_item("total_duration", test_result.total_duration)?;
                 dict.set_item("success_rate", test_result.success_rate)?;
+                dict.set_item("error_rate", test_result.error_rate)?;
                 dict.set_item("median_response_time", test_result.median_response_time)?;
                 dict.set_item("response_time_95", test_result.response_time_95)?;
                 dict.set_item("response_time_99", test_result.response_time_99)?;
@@ -318,14 +325,48 @@ fn batch_async<'a>(
     })
 }
 
+#[pyfunction]
+fn endpoint(py: Python,
+            name: String,
+            url: String,
+            method: String,
+            timeout_secs: u64,
+            weight: u32,
+            json: Option<PyObject>,
+            headers: Option<PyObject>,
+            cookies: Option<String>,
+            assert_options: Option<&PyList>
+) -> PyResult<PyObject>{
+    let dict = PyDict::new(py);
+    dict.set_item("name", name)?;
+    dict.set_item("url", url)?;
+    dict.set_item("method", method)?;
+    dict.set_item("timeout_secs", timeout_secs)?;
+    dict.set_item("weight", weight)?;
+    if let Some(json) = json{
+        dict.set_item("json", json)?;
+    };
+    if let Some(headers) = headers{
+        dict.set_item("headers", headers)?;
+    };
+    if let Some(cookies) = cookies {
+        dict.set_item("cookies", cookies)?;
+    };
+    if let Some(assert_options) = assert_options{
+        dict.set_item("assert_options", assert_options)?;
+    }
+    Ok(dict.into())
+}
+
 
 #[pymodule]
 fn atomic_bomb_engine(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_class::<StatusListenIter>()?;
+    m.add_class::<BatchListenIter>()?;
     m.add_function(wrap_pyfunction!(run, m)?)?;
     m.add_function(wrap_pyfunction!(run_async, m)?)?;
-    m.add_class::<StatusListenIter>()?;
-    m.add_function(wrap_pyfunction!(assert_option, m)?)?;
-    m.add_class::<BatchListenIter>()?;
     m.add_function(wrap_pyfunction!(batch_async, m)?)?;
+    m.add_function(wrap_pyfunction!(assert_option, m)?)?;
+    m.add_function(wrap_pyfunction!(endpoint, m)?)?;
     Ok(())
 }
