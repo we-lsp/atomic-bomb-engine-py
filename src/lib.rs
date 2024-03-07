@@ -233,10 +233,10 @@ impl BatchListenIter {
         Ok(slf)
     }
 
-    fn __next__(mut _slf: PyRefMut<Self>, py: Python) -> PyResult<Option<PyObject>> {
+    fn __next__(_slf: PyRefMut<Self>, py: Python) -> PyResult<Option<PyObject>> {
         let should_stop = *core::status_share::RESULTS_SHOULD_STOP.lock();
         if should_stop {
-            return Ok(None); // 停止迭代
+            return  Err(PyErr::new::<pyo3::exceptions::PyStopIteration, _>("No more data available"));
         }
         let mut queue = core::status_share::RESULTS_QUEUE.lock();
         if let Some(test_result) = queue.pop_front() {
@@ -263,7 +263,7 @@ impl BatchListenIter {
             dict.set_item("api_results", api_results)?;
             Ok(Some(dict.to_object(py)))
         } else {
-            Ok(Some(py.None())) // 暂时没有消息
+            Ok(Some(py.None()))
         }
     }
 }
