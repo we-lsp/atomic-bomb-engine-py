@@ -72,7 +72,7 @@ import asyncio
                 atomic_bomb_engine.assert_option("$.code", 429),
                 atomic_bomb_engine.assert_option("$.code", 200)
             ])
-          print(esult)
+          print(result)
     ```
     jsonpath如果不会用的话，建议去[jsonpath](https://jsonpath.com/)学习
   - 单接口压测结果实时监听
