@@ -1,6 +1,9 @@
 # atomic-bomb-engine-py
 #### [atomic-bomb-engine](https://github.com/qyzhg/atomic-bomb-engine)的python包装实现
 
+<img src="atomic-bomb-engine-logo.png" width="350px" height="350px" alt="logo">
+
+
 ## 使用条件：
 - python版本 >= 3.8
 - windows(x86), linux(x86), mac
