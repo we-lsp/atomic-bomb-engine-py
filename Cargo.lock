@@ -25,14 +25,15 @@ checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
 
 [[package]]
 name = "atomic-bomb-engine"
-version = "0.3.8"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a698d2be3c76181f448a3bdbd9c6df30d39d01ebd84b9fd6c80067c0221038a4"
+checksum = "5b82558bd081675ff240cdc0fcf370165b53528c047fa045981216732cd461a3"
 dependencies = [
  "anyhow",
  "histogram",
  "jsonpath_lib",
  "lazy_static",
+ "os_info",
  "parking_lot",
  "reqwest",
  "serde",
@@ -44,7 +45,7 @@ dependencies = [
 
 [[package]]
 name = "atomic-bomb-engine-py"
-version = "0.3.5"
+version = "0.3.6"
 dependencies = [
  "atomic-bomb-engine",
  "pyo3",
@@ -640,6 +641,17 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "os_info"
+version = "3.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "006e42d5b888366f1880eda20371fedde764ed2213dc8496f49622fa0c99cd5e"
+dependencies = [
+ "log",
+ "serde",
+ "winapi",
 ]
 
 [[package]]
