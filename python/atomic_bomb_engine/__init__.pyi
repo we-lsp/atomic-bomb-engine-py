@@ -76,7 +76,7 @@ async def run_async(
         headers: str | None = None,
         cookie: str | None = None,
         should_prevent:bool = False,
-        assert_options: List[Dict[str, Any]] | None
+        assert_options: List[Dict[str, Any]] | None = None
 ) -> dict:
     """
     异步启动压测引擎

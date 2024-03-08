@@ -358,6 +358,7 @@ fn endpoint(py: Python,
 
 
 #[pymodule]
+#[pyo3(name = "atomic_bomb_engine")]
 fn atomic_bomb_engine(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<StatusListenIter>()?;
     m.add_class::<BatchListenIter>()?;

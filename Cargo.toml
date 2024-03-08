@@ -23,3 +23,7 @@ rustflags = ["-C", "target-feature=+crt-static"]
 [dependencies.pyo3]
 version = "0.20.3"
 features = ["extension-module"]
+
+[tool.maturin]
+name = "atomic_bomb_engine"
+scripts = "python/atomic_bomb_engine"
