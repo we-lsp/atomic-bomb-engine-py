@@ -33,17 +33,24 @@ def ui(func):
 
 async def websocket_handler(request):
     ws = web.WebSocketResponse()
-    result_iter = atomic_bomb_engine.BatchListenIter()
     await ws.prepare(request)
-    for item in result_iter:
-        if item:
-            await ws.send_json(item)
-        await asyncio.sleep(0.3)
-    try:
-        while True:
-            await asyncio.sleep(10)
-    except asyncio.CancelledError:
-        pass
-    finally:
-        await ws.close()
+
+    async def push_result():
+        result_iter = atomic_bomb_engine.BatchListenIter()
+        for item in result_iter:
+            if item:
+                await ws.send_json(item)
+            await asyncio.sleep(0.3)
+
+    push_task = asyncio.create_task(push_result())
+
+    async for msg in ws:
+        if msg.type == web.WSMsgType.TEXT:
+            if msg.data.upper() == "PING":
+                await ws.send_str("PONG")
+        elif msg.type == web.WSMsgType.ERROR:
+            print(f'WebSocket连接错误{ws.exception()}')
+
+    await push_task
+    print('WebSocket连接关闭')
     return ws
