@@ -1,5 +1,6 @@
 import atomic_bomb_engine
 import os
+import sys
 from aiohttp import web
 import asyncio
 
@@ -27,7 +28,8 @@ def ui(func):
 
         event = asyncio.Event()
         await event.wait()
-    print("服务启动成功: http://localhost:8000")
+    sys.stderr.write("服务启动成功: http://localhost:8000\n")
+    sys.stderr.flush()
     return start_service
 
 
@@ -49,8 +51,10 @@ async def websocket_handler(request):
             if msg.data.upper() == "PING":
                 await ws.send_str("PONG")
         elif msg.type is web.WSMsgType.ERROR:
-            print(f'WebSocket连接错误{ws.exception()}')
+            sys.stderr.write(f'WebSocket连接错误{ws.exception()}\n')
+            sys.stderr.flush()
 
     await push_task
-    print('WebSocket连接关闭')
+    sys.stderr.write('WebSocket连接关闭\n')
+    sys.stderr.flush()
     return ws
