@@ -45,10 +45,10 @@ async def websocket_handler(request):
     push_task = asyncio.create_task(push_result())
 
     async for msg in ws:
-        if msg.type == web.WSMsgType.TEXT:
+        if msg.type is web.WSMsgType.TEXT:
             if msg.data.upper() == "PING":
                 await ws.send_str("PONG")
-        elif msg.type == web.WSMsgType.ERROR:
+        elif msg.type is web.WSMsgType.ERROR:
             print(f'WebSocket连接错误{ws.exception()}')
 
     await push_task
