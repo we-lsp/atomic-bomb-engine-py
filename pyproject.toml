@@ -16,7 +16,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 authors = [{name = "qyzhg", email = "qyzhg@qyzhg.com"}]
-dependencies = ["flask", "flask-socketio"]
+dependencies = ["aiohttp"]
 
 
 [tool.maturin]
