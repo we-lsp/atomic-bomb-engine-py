@@ -22,3 +22,6 @@ dependencies = ["aiohttp"]
 [tool.maturin]
 name = "atomic_bomb_engine"
 python-source = "python"
+
+[tool.poetry.include]
+include = ["python/atomic_bomb_engine/dist/**/*"]
