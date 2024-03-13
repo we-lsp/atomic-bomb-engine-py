@@ -6,7 +6,6 @@ use ::atomic_bomb_engine as abe;
 use abe::{core};
 use pyo3_asyncio::tokio::future_into_py;
 use pyo3_asyncio;
-use serde_json;
 
 
 mod utils;
