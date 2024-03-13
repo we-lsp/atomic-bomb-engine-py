@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: 签出代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 设置cargo环境变量
         run: echo "PATH=$PATH:/home/qyzhg/.cargo/bin" >> $GITHUB_ENV
