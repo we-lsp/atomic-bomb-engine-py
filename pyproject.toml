@@ -1,0 +1,27 @@
+[build-system]
+requires = ["maturin>=1.4"]
+build-backend = "maturin"
+
+[project]
+name = "atomic_bomb_engine"
+version = "0.3.8"
+description = "使用rust开发的高性能python压测工具"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/qyzhg/atomic-bomb-engine-py"
+keywords = ["rust", "python", "binding"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Operating System :: OS Independent",
+]
+authors = [{name = "qyzhg", email = "qyzhg@qyzhg.com"}]
+dependencies = ["aiohttp"]
+
+
+[tool.maturin]
+name = "atomic_bomb_engine"
+python-source = "python"
+
+[tool.poetry.include]
+include = ["python/atomic_bomb_engine/dist/**/*"]
