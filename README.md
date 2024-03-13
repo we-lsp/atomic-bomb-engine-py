@@ -10,11 +10,16 @@
 
 ## 使用方法：
 - ### 准备开始
-通过pip安装
+通过pip安装 （0.5.0版本之前）
 ```shell
 pip install atomic-bomb-engine-py
 ```
 在python中引用时注意，需要引用atomic_bomb_engine, 而不是atomic_bomb_engine_py
+<br/> 为了避免混淆，0.5.0版本之后，pip更换了包名，更改为atomic-bomb-engine，
+```shell
+pip install atomic-bomb-engine
+```
+在python中导入
 ```python
 import atomic_bomb_engine
 ```
@@ -23,7 +28,8 @@ import atomic_bomb_engine
 import asyncio
 ```
 - ### 开始压测
-  - 单接口压测
+  - ~~单接口压测~~ 
+  <br/>⚠️由于和批量压测功能重叠，单接口压测将在下个版本中删除
   
   单接口压测可以使用run_async方法
   函数签名和解释如下
@@ -171,11 +177,46 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+# 压测时使用ui界面监控
+
+0.5.0版本后，添加了ui页面，支持批量压测方法
+<br/>导入
+```python
+from atomic_bomb_engine import server
+```
+使用
+```python
+import asyncio
+
+import atomic_bomb_engine
+from atomic_bomb_engine import server
+
+
+@server.ui(port=8000)
+async def run_batch():
+    result = await atomic_bomb_engine.batch_async(
+        test_duration_secs=120,
+        concurrent_requests=100,
+        verbose=False,
+        api_endpoints=[
+            atomic_bomb_engine.endpoint(name="test-baidu",url="https://baidu.com",method="GET",weight=1,timeout_secs=10),
+            atomic_bomb_engine.endpoint(name="test-google", url="https://google.com", method="GET", weight=1, timeout_secs=10),
+        ])
+    print(result)
+    return result
+
+
+if __name__ == '__main__':
+    asyncio.run(run_batch())
+```
+
+使用server.ui装饰器，可以给批量压测方法启动一个简单的web服务器，不需要再手动监听BatchListenIter生成器
+
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
 - 如果有需求也可以在Issues中讨论
 - 本程序是本人业余时间开发，不太准备保证时效性，但是如果有时间，一定第一时间回复和修改bug
 
 ## TODO
- - 前端展示页面
+ - ~~前端展示页面~~ done
  - 接口关联
