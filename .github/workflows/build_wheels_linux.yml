@@ -1,0 +1,55 @@
+name: Build and publish Python wheels for Linux
+
+on:
+  push:
+    branches:
+      - test-action
+  pull_request:
+
+jobs:
+  build-wheels:
+    name: Build wheels on Ubuntu
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 安装Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: 构建Vue项目
+        run: |
+          cd atomic-front
+          npm install
+          npm run build
+
+      - name: 复制dist到Python项目
+        run: cp -r atomic-front/dist/* python/atomic_bomb_engine/dist/
+
+      - name: 设置python环境
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: 安装maturin
+        run: pip install maturin
+
+      - name: 构建wheels
+        run: maturin build --release --interpreter python${{ matrix.python-version }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: 上传wheels
+          path: target/wheels/*.whl
