@@ -43,6 +43,11 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: 为目标架构添加Rust目标
+        run: |
+          rustup target add x86_64-apple-darwin
+          rustup target add aarch64-apple-darwin
+
       - name: 安装maturin
         run: pip install maturin
 
