@@ -52,7 +52,11 @@ jobs:
       - name: 构建wheels
         run: maturin build --release --interpreter python${{ matrix.python-version }}
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: 上传wheels
-          path: target/wheels/*.whl
+      - name: 安装Twine
+        run: pip install twine
+
+      - name: 上传wheels到PyPI
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
