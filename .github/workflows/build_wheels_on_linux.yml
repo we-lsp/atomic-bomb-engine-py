@@ -1,0 +1,41 @@
+name: Build and publish Python wheels for Linux
+
+on:
+  push:
+    branches:
+      - test-action
+  pull_request:
+
+jobs:
+  build-wheels:
+    name: Build wheels on Ubuntu
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Install maturin
+        run: pip install maturin
+
+      - name: Build the wheels
+        run: maturin build --release --strip --manylinux 2010 --interpreter python${{ matrix.python-version }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: python-wheels
+          path: target/wheels/*.whl
