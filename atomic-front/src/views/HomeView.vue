@@ -6,7 +6,7 @@ import HelloWorld from "../components/HelloWorld.vue";
 
 import { onMounted, ref, onUnmounted } from "vue";
 import axios from "axios";
-
+const debounceTimer = ref(null);
 const message = ref("");
 const httpIsError = ref(false);
 const assertIsError = ref(false);
@@ -18,65 +18,85 @@ const hostname = window.location.hostname; // 获取当前页面的域名或IP�
 const port = window.location.port; // 获取当前页面的端口号
 const baseURL = `${hostname}${port ? ":" + port : ""}`; // 拼接域名和端口号
 const ws = new WebSocket(`ws://${baseURL}/ws`);
+// const ws = new WebSocket(`ws://localhost:8000/ws`);
+let heartbeatTimer;
 onMounted(() => {
+  let heartbeatInterval = 5000;
+
+  const startHeartbeat = () => {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+    }
+    heartbeatTimer = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send("PING"); // 发送心跳消息
+      }
+    }, heartbeatInterval);
+  };
   ws.onopen = () => {
     console.log("WebSocket connection opened");
+    startHeartbeat();
   };
 
   ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log("Message received: ", data);
-    message.value = data;
-    httpData.value = data.http_errors;
-    assertData.value = data.assert_errors;
-    api_resultsData.value = data.api_results;
-    if (httpData.value.length) {
-      httpIsError.value = true;
-    } else {
-      httpIsError.value = false;
-    }
-    if (assertData.value.length) {
-      assertIsError.value = true;
-    } else {
-      assertIsError.value = false;
+    if (isValidJSON(event.data)) {
+      const data = JSON.parse(event.data);
+      console.log("Message received: ", data);
+      message.value = data;
+      httpData.value = data.http_errors;
+      assertData.value = data.assert_errors;
+      api_resultsData.value = data.api_results;
+      if (httpData.value.length) {
+        httpIsError.value = true;
+      } else {
+        httpIsError.value = false;
+      }
+      if (assertData.value.length) {
+        assertIsError.value = true;
+      } else {
+        assertIsError.value = false;
+      }
     }
   };
 
   ws.onerror = (error) => {
     console.error("WebSocket error: ", error);
+    clearInterval(heartbeatTimer);
   };
 
   ws.onclose = () => {
     console.log("WebSocket connection closed");
+    clearInterval(heartbeatTimer);
   };
 });
+function isValidJSON(text) {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+const debounceRun = () => {
+  clearTimeout(debounceTimer.value); // 清除现有的计时器
+  debounceTimer.value = setTimeout(run, 1000); // 重新设置计时器
+};
 onUnmounted(() => {
   ws.close(); // 关闭 WebSocket 连接
+  clearInterval(heartbeatTimer);
 });
-const sendMessage = () => {
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send("Hello, server!");
-  } else {
-    console.log("WebSocket is not open.");
-  }
-};
+
 const run = async () => {
-  // message.value = [];
-  // httpData.value = [];
-  // assertData.value = [];
-  // api_resultsData.value = [];
   if (buttonShow.value) {
+    buttonShow.value = false;
     const response = await axios.get(`http://${baseURL}/run`);
+    // const response = await axios.get(`http://localhost:8000/run`);
     console.log("response", response.data);
     message.value = response.data;
     httpData.value = response.data.http_errors;
     assertData.value = response.data.assert_errors;
     api_resultsData.value = response.data.api_results;
-    buttonShow.value = false;
   }
-
-  // buttonShow.value = true;
-  // loading.value = true;
 };
 </script>
 
@@ -98,7 +118,7 @@ const run = async () => {
         <RouterLink to="/about">3D</RouterLink>
       </nav> -->
 
-      <div class="login-box" @click="run">
+      <div class="login-box" @click="debounceRun">
         <a href="#" :class="{ 'is-disabled': !buttonShow }">
           <span></span>
           <span></span>
@@ -115,7 +135,7 @@ const run = async () => {
       <h3>HTTP错误</h3>
       <el-table :data="httpData" style="width: 90rem" height="270">
         <el-table-column prop="code" label="code" width="180" />
-        <el-table-column prop="message" label="message" width="180" />
+        <el-table-column prop="message" label="message" />
         <el-table-column prop="count" label="count" />
         <el-table-column prop="url" label="url" />
       </el-table>
