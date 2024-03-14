@@ -54,5 +54,6 @@ jobs:
 
       - name: 上传wheels到PyPI
         env:
-          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
