@@ -1,0 +1,78 @@
+name: Build and publish Python wheels for Linux, Windows, macOS
+
+on:
+  push:
+    branches:
+      - test-action
+  pull_request:
+
+jobs:
+  build-wheels:
+    name: Build wheels on ${{ matrix.os }} for ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+            arch: 'N/A'
+          - os: windows-latest
+            python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+            arch: 'N/A'
+          - os: macos-latest
+            python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+            arch: 'x86_64-apple-darwin'
+          - os: macos-latest
+            python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+            arch: 'aarch64-apple-darwin'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 安装Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: 构建Vue项目
+        run: |
+          cd atomic-front
+          npm install
+          npm run build
+
+      - name: 复制dist到Python项目
+        run: cp -r atomic-front/dist/* python/atomic_bomb_engine/dist/
+
+      - name: 设置python环境
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: 安装maturin
+        run: pip install maturin
+
+      - name: 构建wheels for macOS
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          for version in ${{ toJson(matrix.python-version) }}; do
+            maturin build --release --target ${{ matrix.arch }} -i python$version
+          done
+        shell: bash
+
+      - name: 构建wheels for Linux and Windows
+        if: matrix.arch == 'N/A'
+        run: |
+          maturin build --release --interpreter python${{ matrix.python-version }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: 上传wheels-${{ matrix.os }}-${{ matrix.arch }}
+          path: target/wheels/*.whl
