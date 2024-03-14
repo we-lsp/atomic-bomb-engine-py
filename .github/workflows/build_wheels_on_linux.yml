@@ -20,7 +20,7 @@ jobs:
       - name: 安装Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
 
       - name: 构建Vue项目
         run: |
