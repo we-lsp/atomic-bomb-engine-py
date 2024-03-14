@@ -28,6 +28,9 @@ jobs:
           npm install
           npm run build
 
+      - name: 删除原有dist
+        run: rm -rf python/atomic_bomb_engine/dist/*
+
       - name: 复制dist到Python项目
         run: cp -r atomic-front/dist/* python/atomic_bomb_engine/dist/
 
