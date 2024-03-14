@@ -3,7 +3,7 @@ name: Build and publish Python wheels for Linux
 on:
   push:
     branches:
-      - test-action
+      - release
   pull_request:
 
 jobs:
