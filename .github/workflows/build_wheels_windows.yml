@@ -28,6 +28,9 @@ jobs:
           npm install
           npm run build
 
+      - name: 清空目标路径
+        run: Remove-Item -Path python\atomic_bomb_engine\dist\* -Recurse -Force
+
       - name: 复制dist到Python项目
         run: Copy-Item atomic-front\dist\* python\atomic_bomb_engine\dist\ -Recurse
 
