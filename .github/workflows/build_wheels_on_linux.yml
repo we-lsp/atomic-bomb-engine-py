@@ -33,7 +33,7 @@ jobs:
         run: pip install maturin
 
       - name: Build the wheels
-        run: maturin build --release --strip --manylinux 2010 --interpreter python${{ matrix.python-version }}
+        run: maturin build --release --interpreter python${{ matrix.python-version }}
 
       - uses: actions/upload-artifact@v2
         with:
