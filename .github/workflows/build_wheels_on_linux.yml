@@ -17,6 +17,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: 安装Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: 构建Vue项目
+        run: |
+          cd atomic-front
+          npm install
+          npm run build
+
+      - name: 复制dist到Python项目
+        run: cp -r atomic-front/dist/* python/atomic_bomb_engine/dist/
+
       - name: 设置python环境
         uses: actions/setup-python@v2
         with:
