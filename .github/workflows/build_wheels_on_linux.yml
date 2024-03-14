@@ -17,25 +17,25 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Python
+      - name: 设置python环境
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Rust
+      - name: 安装Rust
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
 
-      - name: Install maturin
+      - name: 安装maturin
         run: pip install maturin
 
-      - name: Build the wheels
+      - name: 构建wheels
         run: maturin build --release --interpreter python${{ matrix.python-version }}
 
       - uses: actions/upload-artifact@v2
         with:
-          name: python-wheels
+          name: 上传wheels
           path: target/wheels/*.whl
