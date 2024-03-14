@@ -1,0 +1,67 @@
+name: Build and publish Python wheels for macOS
+
+on:
+  push:
+    branches:
+      - release
+  pull_request:
+
+jobs:
+  build-wheels-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: ['x86_64-apple-darwin', 'aarch64-apple-darwin']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 安装Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: 构建Vue项目
+        run: |
+          cd atomic-front
+          npm install
+          npm run build
+
+      - name: 删除原有dist
+        run: rm -rf python/atomic_bomb_engine/dist/*
+
+      - name: 复制dist到Python项目
+        run: cp -r atomic-front/dist/* python/atomic_bomb_engine/dist/
+
+      - name: 设置python环境
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 安装Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: 为目标架构添加Rust目标
+        run: |
+          rustup target add x86_64-apple-darwin
+          rustup target add aarch64-apple-darwin
+
+      - name: 安装maturin
+        run: pip install maturin
+
+      - name: 构建wheels
+        run: maturin build --release --target ${{ matrix.arch }} -i python${{ matrix.python-version }}
+
+      - name: 安装Twine
+        run: pip install twine
+
+      - name: 上传wheels到PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
