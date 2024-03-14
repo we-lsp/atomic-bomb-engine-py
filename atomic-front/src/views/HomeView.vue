@@ -161,15 +161,15 @@ const run = async () => {
       <el-table-column prop="name" label="名称" />
       <el-table-column prop="url" label="url" />
       <el-table-column prop="method" label="请求方法" />
+      <el-table-column prop="rps" label="rps" />
       <el-table-column prop="total_requests" label="总请求数" />
       <el-table-column prop="err_count" label="错误数量" />
       <el-table-column prop="error_rate" label="错误率" />
-      <el-table-column prop="min_response_time" label="最小响应时间" />
-      <el-table-column prop="max_response_time" label="最大响应时间" />
-      <el-table-column prop="median_response_time" label="中位响应时间" />
-      <el-table-column prop="response_time_95" label="95位响应时间" />
-      <el-table-column prop="response_time_99" label="99位响应时间" />
-      <el-table-column prop="rps" label="rps" />
+      <el-table-column prop="min_response_time" label="最小响应时间(ms)" />
+      <el-table-column prop="max_response_time" label="最大响应时间(ms)" />
+      <el-table-column prop="median_response_time" label="中位响应时间(ms)" />
+      <el-table-column prop="response_time_95" label="95位响应时间(ms)" />
+      <el-table-column prop="response_time_99" label="99位响应时间(ms)" />
       <el-table-column
         prop="throughput_per_second_kb"
         label="每秒响应数据（kb）"
