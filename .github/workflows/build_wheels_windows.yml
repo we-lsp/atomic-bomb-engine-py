@@ -52,6 +52,9 @@ jobs:
       - name: 构建wheels
         run: maturin build --release --interpreter python${{ matrix.python-version }}
 
+      - name: 安装Twine
+        run: pip install twine
+
       - name: 上传wheels到PyPI
         env:
           TWINE_USERNAME: __token__
