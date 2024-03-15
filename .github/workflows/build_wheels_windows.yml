@@ -16,14 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: 签出前端
+        uses: actions/checkout@v2
+        with:
+          repository: GiantAxeWhy/atomic-bomb-engine-front
+          path: vue-project
+
       - name: 安装Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '18'
 
-      - name: 构建Vue项目
+      - name: 构建前端
         run: |
-          cd atomic-front
+          cd vue-project  
           npm install
           npm run build
 
@@ -31,7 +37,7 @@ jobs:
         run: Remove-Item -Path python\atomic_bomb_engine\dist\* -Recurse -Force
 
       - name: 复制dist到Python项目
-        run: Copy-Item atomic-front\dist\* python\atomic_bomb_engine\dist\ -Recurse
+        run: Copy-Item vue-project/dist/* python\atomic_bomb_engine\dist\ -Recurse
 
       - name: 设置python环境
         uses: actions/setup-python@v2
