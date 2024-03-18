@@ -45,7 +45,7 @@ dependencies = [
 
 [[package]]
 name = "atomic-bomb-engine-py"
-version = "0.5.7"
+version = "0.5.8"
 dependencies = [
  "atomic-bomb-engine",
  "pyo3",
