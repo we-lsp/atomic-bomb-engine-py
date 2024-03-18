@@ -3,6 +3,7 @@ import os
 import sys
 from aiohttp import web
 import asyncio
+from atomic_bomb_engine import middleware
 
 
 def ui(port: int=8000):
@@ -44,7 +45,7 @@ def ui(port: int=8000):
             async def redirect_to_index(request):
                 raise web.HTTPFound('/static/index.html')
 
-            app = web.Application()
+            app = web.Application(middlewares=[middleware.cors_middleware])
             # 静态页面
             app.router.add_static('/static', path=os.path.join(os.path.dirname(__file__), 'dist'), name='dist')
             # 路由
