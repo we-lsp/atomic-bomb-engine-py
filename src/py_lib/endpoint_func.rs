@@ -9,6 +9,7 @@ pub(crate) fn endpoint(py: Python,
             timeout_secs: u64,
             weight: u32,
             json: Option<PyObject>,
+            form_data: Option<PyObject>,
             headers: Option<PyObject>,
             cookies: Option<String>,
             assert_options: Option<&PyList>
@@ -21,6 +22,9 @@ pub(crate) fn endpoint(py: Python,
     dict.set_item("weight", weight)?;
     if let Some(json) = json{
         dict.set_item("json", json)?;
+    };
+    if let Some(form_data) = form_data{
+        dict.set_item("form_data", form_data)?;
     };
     if let Some(headers) = headers{
         dict.set_item("headers", headers)?;

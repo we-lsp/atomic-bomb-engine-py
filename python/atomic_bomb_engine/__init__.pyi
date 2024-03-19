@@ -16,6 +16,7 @@ def endpoint(
          timeout_secs: int,
          weight: int,
          json: Dict| None = None,
+         form_data: Dict| None = None,
          headers: Dict| None = None,
          cookies: str | None = None,
          assert_options: List| None = None
@@ -28,6 +29,7 @@ def endpoint(
     :param timeout_secs: 超时时间(秒)
     :param weight 权重
     :param json: 请求json
+    :form_data: 请求form表单
     :param headers: 请求头
     :param cookies: cookie
     :assert_options: 断言参数
