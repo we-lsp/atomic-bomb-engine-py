@@ -5,7 +5,7 @@ from aiohttp import web
 import asyncio
 from atomic_bomb_engine import middleware
 import webbrowser
-
+import time
 
 def ui(port: int=8000, auto_open=True):
     if port > 65535 or port < 0:
@@ -21,7 +21,11 @@ def ui(port: int=8000, auto_open=True):
                     result_iter = atomic_bomb_engine.BatchListenIter()
                     for item in result_iter:
                         if item:
-                            await ws.send_json(item)
+                            try:
+                                await ws.send_json(item)
+                            except ConnectionResetError:
+                                sys.stderr.write(f'{time.ctime()}-websocket处于断开状态,无法推送\n')
+                                sys.stderr.flush()
                         await asyncio.sleep(0.2)
 
                 push_task = asyncio.create_task(push_result())
