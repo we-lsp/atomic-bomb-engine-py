@@ -4,9 +4,10 @@ import sys
 from aiohttp import web
 import asyncio
 from atomic_bomb_engine import middleware
+import webbrowser
 
 
-def ui(port: int=8000):
+def ui(port: int=8000, auto_open=True):
     if port > 65535 or port < 0:
         raise ValueError(f"端口必须为0-65535")
     def decorator(func):
@@ -60,5 +61,7 @@ def ui(port: int=8000):
             await asyncio.Event().wait()
         sys.stderr.write(f"服务启动成功: http://localhost:{port}\n")
         sys.stderr.flush()
+        if auto_open:
+            webbrowser.open(f"http://localhost:{port}")
         return start_service
     return decorator
