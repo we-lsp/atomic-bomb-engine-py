@@ -81,6 +81,14 @@ pub fn new(
                 }
             };
 
+            let form_data_obj: PyObject = dict.get_item("form_data").unwrap().to_object(py);
+            let form_data:Option<HashMap<String, String>> = match from_pyobject(form_data_obj.as_ref(py)) {
+                Ok(val) => val,
+                Err(e) => {
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
+                }
+            };
+
             let headers_obj: PyObject = dict.get_item("headers").unwrap().to_object(py);
             let headers:Option<HashMap<String, String>> = match from_pyobject(headers_obj.as_ref(py)) {
                 Ok(val) => val,
@@ -128,6 +136,7 @@ pub fn new(
                 timeout_secs,
                 weight,
                 json,
+                form_data,
                 headers,
                 cookies,
                 assert_options,
