@@ -1,41 +1,46 @@
 import atomic_bomb_engine
 import os
 import sys
-from aiohttp import web
 import asyncio
-from atomic_bomb_engine import middleware
 import webbrowser
 import time
+import aiohttp
+from typing import Dict
+from aiohttp import web
+from atomic_bomb_engine import middleware
 
 
-def ui(port: int=8000, auto_open=True):
+def ui(port: int=8000, auto_open: bool=True):
     if port > 65535 or port < 0:
         raise ValueError(f"端口必须为0-65535")
+
+    class Conn:
+        """连接池对象"""
+        def __init__(self, ws: aiohttp.web_ws.WebSocketResponse, heartbeat_time: float):
+            self.ws = ws
+            self.heartbeat_time = heartbeat_time
+
     # ws连接池
-    connections = {}
-    # 心跳管理
-    heartbeats = {}
+    connections: Dict[str, Conn] = dict()
+
     def decorator(func):
         async def start_service(*args, **kwargs):
             # 定义ws接口
             async def websocket_handler(request):
                 # 获取id
-                client_id = request.match_info['id']
-                if not client_id:
+                if (client_id := request.match_info['id']) is None:
                     return web.Response(status=400, text="缺少id参数")
 
                 ws = web.WebSocketResponse()
                 await ws.prepare(request)
                 # 将id加入连接池
-                connections[client_id] = ws
-                # 将心跳加记录
-                heartbeats[client_id] = time.time()
+                connections[client_id] = Conn(ws, time.time())
 
                 # 心跳检测
                 async def check_heartbeat():
                     while True:
                         await asyncio.sleep(0.3)
-                        if time.time() - heartbeats.get(client_id) > 5:
+                        if time.time() - connections.get(client_id).heartbeat_time > 5:
                             sys.stderr.write(f"{time.ctime()}客户端{client_id} 未发送心跳，断开连接\n")
                             sys.stderr.flush()
                             connections.pop(client_id, None)
@@ -45,25 +50,26 @@ def ui(port: int=8000, auto_open=True):
                 async def push_result():
                     result_iter = atomic_bomb_engine.BatchListenIter()
                     for item in result_iter:
-                        if item and connections.get:
-                            for cid, client_ws in list(connections.items()):
+                        if item:
+                            for cid, conn in list(connections.items()):
                                 try:
-                                    await client_ws.send_json(item)
+                                    await conn.ws.send_json(item)
                                 except ConnectionResetError:
                                     sys.stderr.write(f'{time.ctime()}-WebSocket ID {cid} 断开, 无法推送\n')
                                     sys.stderr.flush()
                                     # 从连接池中移除断开的连接
                                     connections.pop(cid, None)
                         await asyncio.sleep(0.2)
-
+                # 推送任务
                 push_task = asyncio.create_task(push_result())
+                # 心跳任务
                 check_heartbeat_task = asyncio.create_task(check_heartbeat())
 
                 async for msg in ws:
                     if msg.type is web.WSMsgType.TEXT:
                         if msg.data.upper() == "PING":
                             # 更新心跳时间
-                            heartbeats[client_id] = time.time()
+                            connections[client_id].heartbeat_time = time.time()
                             await ws.send_str("PONG")
                     elif msg.type is web.WSMsgType.ERROR:
                         sys.stderr.write(f'WebSocket连接错误{ws.exception()}\n')
