@@ -11,15 +11,15 @@ from typing import Dict
 from aiohttp import web
 from atomic_bomb_engine import middleware
 
-db_connection = None
-
 
 def ui(port: int = 8000, auto_open: bool = True):
     if port > 65535 or port < 0:
         raise ValueError(f"端口必须为0-65535")
+    # 数据库连接
+    db_connection = None
 
     async def get_db_connection():
-        global db_connection
+        nonlocal db_connection
         if db_connection is None:
             db_connection = await aiosqlite.connect(":memory:")
             await db_connection.execute('CREATE TABLE results (id INTEGER PRIMARY KEY, data JSON)')
