@@ -42,7 +42,7 @@ def ui(port: int = 8000, auto_open: bool = True):
         results = [json.loads(row[0]) for row in rows]
         return results
 
-    class Conn:
+    class WsConn:
         """连接池对象"""
 
         def __init__(self, ws: aiohttp.web_ws.WebSocketResponse, heartbeat_time: float):
@@ -50,7 +50,7 @@ def ui(port: int = 8000, auto_open: bool = True):
             self.heartbeat_time = heartbeat_time
 
     # ws连接池
-    connections: Dict[str, Conn] = dict()
+    connections: Dict[str, WsConn] = dict()
 
     def decorator(func):
         async def start_service(*args, **kwargs):
@@ -60,19 +60,21 @@ def ui(port: int = 8000, auto_open: bool = True):
             # 定义ws接口
             async def websocket_handler(request):
                 # 获取id
-                if (client_id := request.match_info['id']) is None:
+                if (client_id := request.match_info.get("id", None)) is None:
                     return web.Response(status=400, text="缺少id参数")
 
                 ws = web.WebSocketResponse()
                 await ws.prepare(request)
                 # 将id加入连接池
-                connections[client_id] = Conn(ws, time.time())
+                connections[client_id] = WsConn(ws, time.time())
 
                 # 心跳检测
                 async def check_heartbeat():
                     while True:
-                        await asyncio.sleep(0.3)
-                        if time.time() - connections.get(client_id).heartbeat_time > 5:
+                        await asyncio.sleep(0.5)
+                        if (ws_conn := connections.get(client_id)) is None:
+                            break
+                        if time.time() - ws_conn.heartbeat_time > 5:
                             sys.stderr.write(f"{time.ctime()}客户端{client_id} 未发送心跳，断开连接\n")
                             sys.stderr.flush()
                             connections.pop(client_id, None)
@@ -103,7 +105,8 @@ def ui(port: int = 8000, auto_open: bool = True):
                     if msg.type is web.WSMsgType.TEXT:
                         if msg.data.upper() == "PING":
                             # 更新心跳时间
-                            connections[client_id].heartbeat_time = time.time()
+                            if (ws_conn := connections.get(client_id, None)) is not None:
+                                ws_conn.heartbeat_time = time.time()
                             await ws.send_str("PONG")
                     elif msg.type is web.WSMsgType.ERROR:
                         sys.stderr.write(f'WebSocket连接错误{ws.exception()}\n')
