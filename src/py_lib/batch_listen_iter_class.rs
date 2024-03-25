@@ -47,6 +47,7 @@ impl BatchListenIter {
             dict.set_item("timestamp", test_result.timestamp)?;
             let api_results = utils::create_api_results_dict::create_api_results_dict(py, test_result.api_results)?;
             dict.set_item("api_results", api_results)?;
+            dict.set_item("total_concurrent_number", test_result.total_concurrent_number)?;
             Ok(Some(dict.to_object(py)))
         } else {
             Ok(Some(py.None()))

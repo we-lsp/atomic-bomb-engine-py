@@ -26,7 +26,7 @@ pub fn create_api_results_dict(py: Python, api_results: Vec<ApiResult>) -> PyRes
         res_dict.set_item("err_count", result.err_count)?;
         res_dict.set_item("total_data_kb", result.total_data_kb)?;
         res_dict.set_item("throughput_per_second_kb", result.throughput_per_second_kb)?;
-
+        res_dict.set_item("concurrent_number", result.concurrent_number)?;
         results.push(res_dict)
     }
     Ok(PyList::new(py, results))
