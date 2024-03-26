@@ -26,6 +26,9 @@ impl BatchListenIter {
             if test_result.total_data_kb == 0.0{
               return   Ok(Some(py.None()))
             };
+            if test_result.api_results.iter().any(|api_result| api_result.name.is_empty()) {
+                return   Ok(Some(py.None()))
+            };
             let dict = PyDict::new(py);
             dict.set_item("total_duration", test_result.total_duration)?;
             dict.set_item("success_rate", test_result.success_rate)?;
