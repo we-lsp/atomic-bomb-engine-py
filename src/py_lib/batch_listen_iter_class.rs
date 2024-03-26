@@ -23,11 +23,11 @@ impl BatchListenIter {
         }
         let mut queue = atomic_bomb_engine::core::status_share::RESULTS_QUEUE.lock();
         if let Some(test_result) = queue.pop_front() {
-            if test_result.total_data_kb == 0.0{
+            if test_result.total_data_kb == 0.0 ||
+                // 如果有名字为空
+                test_result.api_results.iter().any(|api_result| api_result.name.is_empty())
+            {
               return   Ok(Some(py.None()))
-            };
-            if test_result.api_results.iter().any(|api_result| api_result.name.is_empty()) {
-                return   Ok(Some(py.None()))
             };
             let dict = PyDict::new(py);
             dict.set_item("total_duration", test_result.total_duration)?;
