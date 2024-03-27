@@ -43,7 +43,7 @@ pub(crate) fn batch_async<'a>(
                 dict.set_item("max_response_time", test_result.max_response_time)?;
                 dict.set_item("min_response_time", test_result.min_response_time)?;
                 dict.set_item("err_count", test_result.err_count)?;
-                dict.set_item("concurrent_number", test_result.total_concurrent_number)?;
+                dict.set_item("total_concurrent_number", test_result.total_concurrent_number)?;
                 dict.set_item("total_data_kb", test_result.total_data_kb)?;
                 dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
                 let http_error_list = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
