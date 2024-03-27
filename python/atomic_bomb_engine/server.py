@@ -78,7 +78,7 @@ def ui(port: int = 8000, auto_open: bool = True):
                             sys.stderr.write(f"{time.ctime()}客户端{client_id} 未发送心跳，断开连接\n")
                             sys.stderr.flush()
                             connections.pop(client_id, None)
-                            await ws.close()
+                            await ws_conn.ws.close()
                             break
 
                 async def push_result():
@@ -94,6 +94,7 @@ def ui(port: int = 8000, auto_open: bool = True):
                                     sys.stderr.flush()
                                     # 从连接池中移除断开的连接
                                     connections.pop(cid, None)
+                                    return
                         await asyncio.sleep(0.2)
 
                 # 推送任务
