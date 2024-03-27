@@ -18,6 +18,22 @@ def ui(port: int = 8000, auto_open: bool = True):
     # 数据库连接
     db_connection = None
 
+    # 运行锁
+    class RunningState:
+        def __init__(self):
+            self._running = False
+            self._lock = asyncio.Lock()
+
+        async def set_running(self):
+            async with self._lock:
+                self._running = True
+
+        async def is_running(self) -> bool:
+            async with self._lock:
+                return self._running
+
+    running = RunningState()
+
     async def get_db_connection():
         nonlocal db_connection
         if db_connection is None:
@@ -121,10 +137,34 @@ def ui(port: int = 8000, auto_open: bool = True):
                 connections.pop(client_id, None)
                 return ws
 
+            # 异步任务回调
+            def task_done_callback(task):
+                # 获取任务结果
+                result = task.result()
+                asyncio.create_task(push_done_callback(result))
+
+            # 推送成功结果
+            async def push_done_callback(result):
+                await insert_result_data(result)
+                for cid, conn in list(connections.items()):
+                    try:
+                        await conn.ws.send_json(result)
+                        await conn.ws.send_str("DONE")
+                    except ConnectionResetError:
+                        sys.stderr.write(f'{time.ctime()}-WebSocket ID {cid} 断开, 无法推送\n')
+                        sys.stderr.flush()
+                        # 从连接池中移除断开的连接
+                        connections.pop(cid, None)
+                        return
+
             # 定义run接口
             async def run_decorated_function(request):
-                result = await func(*args, **kwargs)
-                return web.json_response(result)
+                if await running.is_running():
+                    return web.json_response({"message": "任务正在运行中", "success": False})
+                await running.set_running()
+                task = asyncio.create_task(func(*args, **kwargs))
+                task.add_done_callback(task_done_callback)
+                return web.json_response({"message": "压测任务已启动", "success": True})
 
             # 定义history接口
             async def history(request):
