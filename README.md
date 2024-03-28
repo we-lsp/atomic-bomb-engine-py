@@ -231,3 +231,6 @@ if __name__ == '__main__':
 ## 联系方式
 - 邮箱:[qyzhg@qyzhg.com](mailto:qyzhg@qyzhg.com)
 - 微信:qy-zhg
+
+## 👏🏻👏🏻👏🏻欢迎加群交流
+![img.png](img.png)
