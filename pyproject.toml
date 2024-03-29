@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "atomic_bomb_engine"
-version = "0.15.0"
+version = "0.15.1"
 description = "使用rust开发的高性能python压测工具"
 license = "MIT"
 readme = "README.md"
