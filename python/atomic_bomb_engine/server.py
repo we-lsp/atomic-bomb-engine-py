@@ -111,7 +111,7 @@ def ui(port: int = 8000, auto_open: bool = True):
                                     # 从连接池中移除断开的连接
                                     connections.pop(cid, None)
                                     return
-                        await asyncio.sleep(0.2)
+                        await asyncio.sleep(0.5)
 
                 # 推送任务
                 push_task = asyncio.create_task(push_result())
