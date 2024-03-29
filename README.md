@@ -31,107 +31,51 @@ import atomic_bomb_engine
 import asyncio
 ```
 - ### 开始压测
-  - ~~单接口压测~~ 
-  <br/>⚠️由于和批量压测功能重叠，单接口压测将在下个版本中删除
-  
-  单接口压测可以使用run_async方法
-  函数签名和解释如下
-  ```python
-  async def run_async(
-        url: str,
-        method: str,
-        test_duration_secs: int,
-        concurrent_requests: int,
-        timeout_secs: int,
-        verbose: bool = False,
-        json_str: str | None = None,
-        form_data_str: str | None = None,
-        headers: str | None = None,
-        cookie: str | None = None,
-        should_prevent:bool = False,
-        assert_options: List[Dict[str, Any]] | None
-            ) -> dict:
-            """
-            异步启动压测引擎
-            :param url: 压测地址
-            :param method: 请求方式
-            :param test_duration_secs: 持续时间
-            :param concurrent_requests: 并发量
-            :param timeout_secs: 接口超时时间
-            :param verbose: 开启详情日志
-            :param json_str: 使用json请求发送请求,使用json字符串,不要使用字典类型
-            :param form_data_str: 使用form方式发送请求
-            :param headers: 添加请求头
-            :param cookie: 添加cookie
-            :param should_prevent: 实验性功能！压测过程中是否阻止休眠，此参数为true时，需要使用管理员权限运行才有效果，使用此功能会增加电脑功耗，但在无人值守时会非常有用
-            :param assert_options: 断言，传入一个字典列表，key必须包含两个：jsonpath和reference_object e.g. [{"jsonpath": "$.code", "reference_object": 429}, {"jsonpath": "$.code", "reference_object": "300"}]， 也可以使用本包中的assert_option方法生成option
-            :return: Dict
-            """
-  ```
-  使用assert_options时，要传入一个字典，但是如果感觉这个字典比较难以记忆的话，可以使用本包中的assert_option方法返回这个字典
-    ```python
-      async def run():
-          print("开始压测")
-          result = await atomic_bomb_engine.run_async(
-            url="https://xxxxx.xxx",
-            method="GET",
-            test_duration_secs=60,
-            concurrent_requests=200,
-            timeout_secs=10,
-            verbose=False,
-            should_prevent=True,
-            assert_options=[
-                atomic_bomb_engine.assert_option("$.code", 429),
-                atomic_bomb_engine.assert_option("$.code", 200)
-            ])
-          print(result)
-    ```
-    jsonpath如果不会用的话，建议去[jsonpath](https://jsonpath.com/)学习
-  - 单接口压测结果实时监听
-  可以迭代包中的StatusListenIter类进行压测结果的监听
-  ```python
-  async def listen():
-    iterator = atomic_bomb_engine.StatusListenIter()
-    for message in iterator:
-        if message:
-            print(message)
-        else:
-            await asyncio.sleep(0.3)
-  ```
-   在这个循环中，你可以做落库等各种操作，不再赘述
-  
-    - 压测时同时监听可以这样使用
-  ```python
-  async def main():
-    await asyncio.gather(
-        run(),
-        listen(),
-    )
-  
-  
-  if __name__ == "__main__":
-    asyncio.run(main())
-  ```
+  - ~~单接口压测~~ （功能与多接口压测重叠，已废除）
 
   - 多接口压测
 
 多接口压测可以使用batch_async方法进行操作，函数签名和解释如下
  ```python
- async def batch_async(
-             test_duration_secs: int,
-             concurrent_requests: int,
-             api_endpoints:List[Dict],
-             verbose:bool=False,
-             should_prevent:bool=False) ->Dict:
-    """
-        批量压测
-        :param test_duration_secs: 测试持续时间
-        :param concurrent_requests: 并发数
-        :param api_endpoints: 接口信息
-        :param verbose: 打印详细信息
-        :param should_prevent: 是否禁用睡眠
-    """
+async def batch_async(
+        test_duration_secs: int,
+        concurrent_requests: int,
+        api_endpoints:List[Dict],
+        step_option:Dict[str, int]=None,
+        verbose:bool=False,
+        should_prevent:bool=False) ->Dict:
+  """
+      批量压测
+      :param test_duration_secs: 测试持续时间
+      :param concurrent_requests: 并发数
+      :param api_endpoints: 接口信息
+      :param step_option: 阶梯加压选项
+      :param verbose: 打印详细信息
+      :param should_prevent: 是否禁用睡眠
+  """
+
  ```
+
+使用assert_option方法可以返回断言选项字典
+```python
+assert_options=[
+atomic_bomb_engine.assert_option("$.code", 429),
+atomic_bomb_engine.assert_option("$.code", 200)
+])
+print(result)
+```
+jsonpath如果不会用的话，建议去[jsonpath](https://jsonpath.com/)学习
+
+使用step_option方法可以返回阶梯加压选项字典
+```python
+def step_option(increase_step: int, increase_interval: int) -> Dict[str, int]:
+    """
+    生成step option
+    :param increase_step: 阶梯步长
+    :param increase_interval: 阶梯间隔
+    """
+```
+
 同样的本包中也包含了一个对api_endpoint的包装：endpoint方法，方便调用，endpoint中的assert_options中也可以套用assert_option方法
  ```python
     async def run_batch():
