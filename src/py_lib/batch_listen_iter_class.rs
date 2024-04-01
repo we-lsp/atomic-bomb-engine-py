@@ -1,6 +1,8 @@
 use pyo3::{pyclass, PyErr, pymethods, PyObject, PyRefMut, PyResult, Python, ToPyObject};
 use pyo3::types::PyDict;
 use crate::utils;
+use tokio::runtime::Runtime;
+
 
 #[pyclass]
 pub(crate) struct BatchListenIter {}
@@ -17,11 +19,23 @@ impl BatchListenIter {
     }
 
     fn __next__(_slf: PyRefMut<Self>, py: Python) -> PyResult<Option<PyObject>> {
-        let should_stop = *atomic_bomb_engine::core::status_share::RESULTS_SHOULD_STOP.lock();
+        // let should_stop = *atomic_bomb_engine::core::status_share::RESULTS_SHOULD_STOP.lock();
+        // if should_stop {
+        //     return  Err(PyErr::new::<pyo3::exceptions::PyStopIteration, _>("No more data available"));
+        // }
+        let rt = Runtime::new().unwrap();
+        let should_stop = rt.block_on(async {
+            let lock = atomic_bomb_engine::core::status_share::RESULTS_SHOULD_STOP.lock().await;
+            *lock
+        });
         if should_stop {
             return  Err(PyErr::new::<pyo3::exceptions::PyStopIteration, _>("No more data available"));
         }
-        let mut queue = atomic_bomb_engine::core::status_share::RESULTS_QUEUE.lock();
+        // let mut queue = atomic_bomb_engine::core::status_share::RESULTS_QUEUE.lock();
+        let mut queue = rt.block_on(async {
+            let lock = atomic_bomb_engine::core::status_share::RESULTS_QUEUE.lock().await;
+            lock
+        });
         if let Some(test_result) = queue.pop_front() {
             if test_result.total_data_kb == 0.0 ||
                 // 如果有名字为空

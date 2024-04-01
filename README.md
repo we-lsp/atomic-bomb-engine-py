@@ -62,7 +62,6 @@ assert_options=[
 atomic_bomb_engine.assert_option("$.code", 429),
 atomic_bomb_engine.assert_option("$.code", 200)
 ])
-print(result)
 ```
 jsonpath如果不会用的话，建议去[jsonpath](https://jsonpath.com/)学习
 
@@ -111,7 +110,7 @@ async def listen_batch():
         else:
             await asyncio.sleep(0.3)
 ```
-同时调用时同单接口
+压测+同时监听
 ```python 
 async def main():
     await asyncio.gather(

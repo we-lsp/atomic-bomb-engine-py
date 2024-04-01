@@ -1,6 +1,8 @@
 use pyo3::{pyclass, pymethods, PyObject, PyRefMut, PyResult, Python, ToPyObject};
 use pyo3::types::PyDict;
 use crate::{utils};
+use tokio::runtime::Runtime;
+
 
 #[pyclass]
 pub(crate) struct StatusListenIter {}
@@ -17,11 +19,20 @@ impl StatusListenIter {
     }
 
     fn __next__(mut _slf: PyRefMut<Self>, py: Python) -> PyResult<Option<PyObject>> {
-        let should_stop = *atomic_bomb_engine::core::status_share::SINGLE_SHOULD_STOP.lock();
+        let rt = Runtime::new().unwrap();
+        let should_stop = rt.block_on(async {
+            let lock = atomic_bomb_engine::core::status_share::SINGLE_SHOULD_STOP.lock().await;
+            *lock
+        });
         if should_stop {
             return Ok(None); // 停止迭代
         }
-        let mut queue = atomic_bomb_engine::core::status_share::SINGLE_RESULT_QUEUE.lock();
+        // let mut queue = atomic_bomb_engine::core::status_share::SINGLE_RESULT_QUEUE.lock();
+
+        let mut queue = rt.block_on(async {
+            let lock = atomic_bomb_engine::core::status_share::SINGLE_RESULT_QUEUE.lock().await;
+            lock
+        });
         if let Some(test_result) = queue.pop_front() {
             let dict = PyDict::new(py);
             dict.set_item("total_duration", test_result.total_duration)?;
