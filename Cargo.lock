@@ -25,9 +25,9 @@ checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
 
 [[package]]
 name = "atomic-bomb-engine"
-version = "0.6.6"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17f99d51227e00632650c9ed0914a38213d835758cab5ac3aaefbc6d5375ac68"
+checksum = "9ac65ad700a2152d2e11cb1571baa5d625f9dc553edbacd5d92b00114f06dcd1"
 dependencies = [
  "anyhow",
  "futures",
@@ -46,7 +46,7 @@ dependencies = [
 
 [[package]]
 name = "atomic-bomb-engine-py"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "atomic-bomb-engine",
  "pyo3",
