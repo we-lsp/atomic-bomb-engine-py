@@ -173,7 +173,12 @@ def ui(port: int = 8000, auto_open: bool = True):
 
             # 重定向到首页
             async def redirect_to_index(request):
-                raise web.HTTPFound('/static/index.html')
+                response = web.HTTPFound('/static/index.html')
+                # 禁用缓存
+                response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                response.headers['Expires'] = '0'
+                return response
 
             app = web.Application(middlewares=[middleware.cors_middleware])
             # 静态页面
