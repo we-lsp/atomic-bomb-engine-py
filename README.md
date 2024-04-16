@@ -1,5 +1,5 @@
 # atomic-bomb-engine-py
-#### [atomic-bomb-engine](https://github.com/qyzhg/atomic-bomb-engine)的python包装实现
+#### [atomic-bomb-engine](https://github.com/we-lsp/atomic-bomb-engine)的python包装实现
 
 <img src="img/atomic-bomb-engine-logo.png" width="350px" height="350px" alt="logo">
 
