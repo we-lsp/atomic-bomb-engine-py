@@ -1,7 +1,7 @@
 # atomic-bomb-engine-py
 #### [atomic-bomb-engine](https://github.com/qyzhg/atomic-bomb-engine)的python包装实现
 
-<img src="atomic-bomb-engine-logo.png" width="350px" height="350px" alt="logo">
+<img src="img/atomic-bomb-engine-logo.png" width="350px" height="350px" alt="logo">
 
 
 ## 前端仓库
