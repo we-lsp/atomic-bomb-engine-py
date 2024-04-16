@@ -14,5 +14,7 @@ fn atomic_bomb_engine(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_lib::assert_option_func::assert_option, m)?)?;
     m.add_function(wrap_pyfunction!(py_lib::endpoint_func::endpoint, m)?)?;
     m.add_function(wrap_pyfunction!(py_lib::step_option_func::step_option, m)?)?;
+    m.add_function(wrap_pyfunction!(py_lib::setup_option_func::setup_option, m)?)?;
+    m.add_function(wrap_pyfunction!(py_lib::jsonpath_extract_func::jsonpath_extract_option, m)?)?;
     Ok(())
 }

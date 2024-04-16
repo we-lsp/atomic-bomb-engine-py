@@ -9,6 +9,7 @@ test_duration_secs,
 concurrent_requests,
 api_endpoints,
 step_option=None,
+setup_options=None,
 verbose=false,
 should_prevent=false,
 ))]
@@ -18,20 +19,23 @@ pub(crate) fn batch_async<'a>(
     concurrent_requests: usize,
     api_endpoints: &'a PyList,
     step_option: Option<&PyDict>,
+    setup_options: Option<&PyList>,
     verbose: bool,
     should_prevent: bool,
 ) -> PyResult<&'a PyAny> {
     let endpoints = utils::parse_api_endpoints::new(py, api_endpoints)?;
     let step_opt = utils::parse_step_options::new(step_option)?;
+    let setup_opts = utils::parse_setup_options::new(py, setup_options)?;
 
     future_into_py(py, async move {
         let result = atomic_bomb_engine::core::batch::batch(
-           test_duration_secs,
+            test_duration_secs,
             concurrent_requests,
             verbose,
             should_prevent,
             endpoints,
-            step_opt
+            step_opt,
+            setup_opts
         ).await;
 
         Python::with_gil(|py| match result {

@@ -39,10 +39,10 @@ def endpoint(
     :param timeout_secs: 超时时间(秒)
     :param weight 权重
     :param json: 请求json
-    :form_data: 请求form表单
+    :param form_data: 请求form表单
     :param headers: 请求头
     :param cookies: cookie
-    :assert_options: 断言参数
+    :param assert_options: 断言参数
     """
 
 
@@ -63,11 +63,44 @@ class BatchListenIter:
     def __next__(self) -> Optional[PyAny]: ...
 
 
+def setup_option(
+        name: str,
+        url: str,
+        method: str,
+        timeout_secs: int,
+        json: Dict| None = None,
+        form_data: Dict| None = None,
+        headers: Dict| None = None,
+        cookies: str | None = None,
+        jsonpath_extract: List| None = None) ->Dict[str, Any]:
+    """
+    初始化选项
+    :param name: 接口名称
+    :param url: 接口地址
+    :param method: 请求方法
+    :param timeout_secs: 超时秒数
+    :param json: 请求json
+    :param form_data: 请求form表单
+    :param headers: 请求头
+    :param cookies: cookie
+    :param jsonpath_extract: 通过jsonpath提取参数
+    :return:
+    """
+
+def jsonpath_extract_option(key: str, jsonpath: str) -> Dict[str, str]:
+    """
+    jsonpath提取参数设置
+    :param key: 全局key
+    :param jsonpath: 提取jsonpath路径
+    :return:
+    """
+
 async def batch_async(
              test_duration_secs: int,
              concurrent_requests: int,
              api_endpoints:List[Dict],
-             step_option:Dict[str, int]=None,
+             step_option:Dict[str, int]|None=None,
+             setup_options:List[Dict[str, Any]]|None=None,
              verbose:bool=False,
              should_prevent:bool=False) ->Dict:
     """
@@ -76,6 +109,7 @@ async def batch_async(
         :param concurrent_requests: 并发数
         :param api_endpoints: 接口信息
         :param step_option: 阶梯加压选项
+        :param setup_options: 初始化选项
         :param verbose: 打印详细信息
         :param should_prevent: 是否禁用睡眠
     """
