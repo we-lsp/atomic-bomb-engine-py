@@ -161,6 +161,42 @@ if __name__ == '__main__':
 ## 内部架构图
 ![architecture.png](img/architecture.png)
 
+## [0.19.0] - 2024-04-16
+### Added
+- 增加了初始化和参数模版功能
+```python
+setup_options=[
+            atomic_bomb_engine.setup_option(
+                name="初始化-1",
+                url="https://xxx.xxx/api/short/v1/list",
+                method="get",
+                timeout_secs=10,
+                jsonpath_extract=[
+                    atomic_bomb_engine.jsonpath_extract_option(key="test-msg", jsonpath="$.msg"),
+                    atomic_bomb_engine.jsonpath_extract_option(key="test-code", jsonpath="$.code"),
+                ]
+            )],
+```
+上述实例展示了如何在初始化的时候调用某个接口，并且通过jsonpath将数据提取出来，保存在全局变量test-msg和test-code中
+提取完全局变量后，就可以在后续的api_endpoints中使用
+```python
+api_endpoints=[
+        atomic_bomb_engine.endpoint(
+            name="test-1",
+            url="http://127.0.0.1:8000/a",
+            method="POST",
+            weight=1,
+            timeout_secs=10,
+            json={"name": "{{test-msg}}", "number": "{{test-code}}"},
+        ),
+    ]
+```
+上述实例展示了如何在请求中使用全局变量，使用双大括号即可使用
+
+### Fixed
+- 修复了如果http状态码错误时，不会记录
+- 修复了json反序列化的问题
+
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
 - 如果有需求也可以在Issues中讨论
@@ -168,7 +204,7 @@ if __name__ == '__main__':
 
 ## TODO
 - [x] 前端展示页面 ✅
-- [ ] 接口关联
+- [x] 接口关联 ✅
 - [ ] 每个接口可以配置思考时间
 - [x] 增加form支持 ✅
 - [ ] 增加附件支持
