@@ -1,6 +1,6 @@
 [package]
 name = "atomic-bomb-engine-py"
-version = "0.20.0"
+version = "0.21.0"
 edition = "2021"
 
 [lib]
@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-atomic-bomb-engine = "0.11.0"
+atomic-bomb-engine = "0.11.1"
 # atomic-bomb-engine = { git = "https://github.com/we-lsp/atomic-bomb-engine.git", branch = "async-assert"}
 tokio = "1.36.0"
 pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime"] }
