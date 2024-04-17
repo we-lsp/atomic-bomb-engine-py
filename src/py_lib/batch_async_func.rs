@@ -12,6 +12,7 @@ step_option=None,
 setup_options=None,
 verbose=false,
 should_prevent=false,
+assert_channel_buffer_size=1024,
 ))]
 pub(crate) fn batch_async<'a>(
     py: Python<'a>,
@@ -22,6 +23,7 @@ pub(crate) fn batch_async<'a>(
     setup_options: Option<&PyList>,
     verbose: bool,
     should_prevent: bool,
+    assert_channel_buffer_size: usize,
 ) -> PyResult<&'a PyAny> {
     let endpoints = utils::parse_api_endpoints::new(py, api_endpoints)?;
     let step_opt = utils::parse_step_options::new(step_option)?;
@@ -35,7 +37,8 @@ pub(crate) fn batch_async<'a>(
             should_prevent,
             endpoints,
             step_opt,
-            setup_opts
+            setup_opts,
+            assert_channel_buffer_size
         ).await;
 
         Python::with_gil(|py| match result {
