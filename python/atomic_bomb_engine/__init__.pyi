@@ -102,7 +102,9 @@ async def batch_async(
              step_option:Dict[str, int]|None=None,
              setup_options:List[Dict[str, Any]]|None=None,
              verbose:bool=False,
-             should_prevent:bool=False) ->Dict:
+             should_prevent:bool=False,
+             assert_channel_buffer_size:int=1024,
+) ->Dict:
     """
         批量压测
         :param test_duration_secs: 测试持续时间
@@ -112,4 +114,5 @@ async def batch_async(
         :param setup_options: 初始化选项
         :param verbose: 打印详细信息
         :param should_prevent: 是否禁用睡眠
+        :param assert_channel_buffer_size: 断言队列buffer大小
     """
