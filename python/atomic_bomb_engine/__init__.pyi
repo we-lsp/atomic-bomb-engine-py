@@ -17,17 +17,26 @@ def step_option(increase_step: int, increase_interval: int) -> Dict[str, int]:
     :param increase_interval: 阶梯间隔
     """
 
+def think_time_option(min_millis: int, max_millis: int) -> Dict[str, int]:
+    """
+    思考时间选项
+    :param min_millis:
+    :param max_millis:
+    :return:
+    """
+
 def endpoint(
          name: str,
          url: str,
          method: str,
          timeout_secs: int,
          weight: int,
-         json: Dict| None = None,
-         form_data: Dict| None = None,
-         headers: Dict| None = None,
+         json: Dict | None = None,
+         form_data: Dict | None = None,
+         headers: Dict | None = None,
          cookies: str | None = None,
-         assert_options: List| None = None
+         assert_options: List | None = None,
+         think_time_option: Dict[str, int] | None = None,
          ) -> Dict[str, Any]:
     """
     生成endpoint
@@ -43,6 +52,7 @@ def endpoint(
     :param headers: 请求头
     :param cookies: cookie
     :param assert_options: 断言参数
+    :param think_time_option: 思考时间
     """
 
 
