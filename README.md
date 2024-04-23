@@ -214,6 +214,31 @@ api_endpoints=[
 ### Added
 异步断言使用了补偿消息，保证消息的一致性
 
+## [0.25.0] - 2024-04-23
+### Added
+在endpoints中增加思考时间,模拟用户行为
+```python
+think_time_option(min_millis=200, max_millis=300)
+```
+  - min_millis:最小思考时间(毫秒)
+  - max_millis:最大思考时间(毫秒)
+
+使用时在endpoint中增加think_time_option参数
+
+```python
+api_endpoints=[
+  atomic_bomb_engine.endpoint(
+    name="test-1",
+    url="http://127.0.0.1:8000/a",
+    method="POST",
+    weight=1,
+    timeout_secs=10,
+    json={"name": "{{test-msg}}", "number": "{{test-code}}"},
+    think_time_option=atomic_bomb_engine.think_time_option(min_millis=200, max_millis=300),
+  ),
+]
+```
+
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
 - 如果有需求也可以在Issues中讨论

@@ -3,6 +3,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use serde_json::Value;
 use atomic_bomb_engine::models;
+use atomic_bomb_engine::models::api_endpoint::ThinkTime;
 use atomic_bomb_engine::models::assert_option::AssertOption;
 use serde_pyobject::from_pyobject;
 
@@ -128,6 +129,28 @@ pub fn new(
                 }
             };
 
+            let think_time_option: Option<ThinkTime> = match dict.get_item("think_time_option"){
+                Ok(op_py_any) => {
+                    match op_py_any {
+                        None => {None}
+                        Some(py_any) => {
+                            let pyobj = py_any.to_object(py);
+                            match from_pyobject(pyobj.as_ref(py)) {
+                                Ok(val) => val,
+                                Err(e) =>{
+                                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
+                                        "Error: {:?}",
+                                        e
+                                    )))
+                                }
+                            }
+                        }
+                    }
+                }
+                Err(e) => {
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
+                }
+            };
 
             endpoints.push(models::api_endpoint::ApiEndpoint {
                 name,
@@ -140,6 +163,7 @@ pub fn new(
                 headers,
                 cookies,
                 assert_options,
+                think_time_option,
             });
         }
     }
