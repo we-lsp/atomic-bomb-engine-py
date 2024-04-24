@@ -1,7 +1,7 @@
+use atomic_bomb_engine::models;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use serde_json::Value;
-use atomic_bomb_engine::models;
 use serde_pyobject::from_pyobject;
 
 pub fn new(

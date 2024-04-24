@@ -1,7 +1,7 @@
-use pyo3::{PyAny, PyErr, pyfunction, PyResult, Python, ToPyObject};
-use pyo3::types::{PyDict, PyList};
-use pyo3_asyncio::tokio::future_into_py;
 use crate::utils;
+use pyo3::types::{PyDict, PyList};
+use pyo3::{pyfunction, PyAny, PyErr, PyResult, Python, ToPyObject};
+use pyo3_asyncio::tokio::future_into_py;
 
 #[pyfunction]
 #[pyo3(signature = (
@@ -38,8 +38,9 @@ pub(crate) fn batch_async<'a>(
             endpoints,
             step_opt,
             setup_opts,
-            assert_channel_buffer_size
-        ).await;
+            assert_channel_buffer_size,
+        )
+        .await;
 
         Python::with_gil(|py| match result {
             Ok(test_result) => {
@@ -55,19 +56,37 @@ pub(crate) fn batch_async<'a>(
                 dict.set_item("max_response_time", test_result.max_response_time)?;
                 dict.set_item("min_response_time", test_result.min_response_time)?;
                 dict.set_item("err_count", test_result.err_count)?;
-                dict.set_item("total_concurrent_number", test_result.total_concurrent_number)?;
+                dict.set_item(
+                    "total_concurrent_number",
+                    test_result.total_concurrent_number,
+                )?;
                 dict.set_item("total_data_kb", test_result.total_data_kb)?;
-                dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
-                let http_error_list = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
+                dict.set_item(
+                    "throughput_per_second_kb",
+                    test_result.throughput_per_second_kb,
+                )?;
+                let http_error_list = utils::create_http_err_dict::create_http_error_dict(
+                    py,
+                    &test_result.http_errors,
+                )?;
                 dict.set_item("http_errors", http_error_list)?;
-                let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+                let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(
+                    py,
+                    &test_result.assert_errors,
+                )?;
                 dict.set_item("assert_errors", assert_error_list)?;
                 dict.set_item("timestamp", test_result.timestamp)?;
-                let api_results = utils::create_api_results_dict::create_api_results_dict(py, test_result.api_results)?;
+                let api_results = utils::create_api_results_dict::create_api_results_dict(
+                    py,
+                    test_result.api_results,
+                )?;
                 dict.set_item("api_results", api_results)?;
                 Ok(dict.to_object(py))
-            },
-            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e))),
+            }
+            Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
+                "Error: {:?}",
+                e
+            ))),
         })
     })
 }

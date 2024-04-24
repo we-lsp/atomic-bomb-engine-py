@@ -1,7 +1,10 @@
-use std::collections::HashMap;
-use pyo3::{PyResult, Python};
 use pyo3::types::{PyDict, PyList};
-pub fn create_assert_error_dict<'py>(py: Python<'py>, assert_errors: &HashMap<(String, String), u32>) -> PyResult<&'py PyList> {
+use pyo3::{PyResult, Python};
+use std::collections::HashMap;
+pub fn create_assert_error_dict<'py>(
+    py: Python<'py>,
+    assert_errors: &HashMap<(String, String), u32>,
+) -> PyResult<&'py PyList> {
     if assert_errors.is_empty() {
         return Ok(PyList::empty(py));
     }
