@@ -152,15 +152,20 @@ pub fn new(
                     return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
-            let setup_options: Option<&PyList> = match dict.get_item("setup_options"){
+            let setup_options_pylist: Option<&PyList> = match dict.get_item("setup_options"){
                 Ok(opts) => {
                     match opts {
-                        None => {None}
+                        None => {
+                            None
+                        }
                         Some(py_any) => {
-                            if let Ok(py_list) = py_any.extract::<&PyList>() {
-                                Some(py_list)
-                            } else {
-                                None
+                            match py_any.extract::<&PyList>() {
+                                Ok(py_list) => {
+                                    Some(py_list)
+                                }
+                                Err(e) => {
+                                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
+                                }
                             }
                         }
                     }
@@ -169,7 +174,8 @@ pub fn new(
                     return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
-            let setup_opts = utils::parse_setup_options::new(py, setup_options)?;
+            let setup_options = utils::parse_setup_options::new(py, setup_options_pylist)?;
+
             endpoints.push(models::api_endpoint::ApiEndpoint {
                 name,
                 url,
@@ -182,7 +188,7 @@ pub fn new(
                 cookies,
                 assert_options,
                 think_time_option,
-                setup_options: setup_opts,
+                setup_options,
             });
         }
     }
