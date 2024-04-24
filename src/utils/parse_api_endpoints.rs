@@ -6,6 +6,7 @@ use atomic_bomb_engine::models;
 use atomic_bomb_engine::models::api_endpoint::ThinkTime;
 use atomic_bomb_engine::models::assert_option::AssertOption;
 use serde_pyobject::from_pyobject;
+use crate::utils;
 
 pub fn new(
     py: Python,
@@ -151,7 +152,24 @@ pub fn new(
                     return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
                 }
             };
-
+            let setup_options: Option<&PyList> = match dict.get_item("setup_options"){
+                Ok(opts) => {
+                    match opts {
+                        None => {None}
+                        Some(py_any) => {
+                            if let Ok(py_list) = py_any.extract::<&PyList>() {
+                                Some(py_list)
+                            } else {
+                                None
+                            }
+                        }
+                    }
+                }
+                Err(e) => {
+                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
+                }
+            };
+            let setup_opts = utils::parse_setup_options::new(py, setup_options)?;
             endpoints.push(models::api_endpoint::ApiEndpoint {
                 name,
                 url,
@@ -164,6 +182,7 @@ pub fn new(
                 cookies,
                 assert_options,
                 think_time_option,
+                setup_options: setup_opts,
             });
         }
     }

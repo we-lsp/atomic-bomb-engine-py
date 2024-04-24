@@ -121,6 +121,31 @@ pub fn new(
                         }
                     };
 
+                    let cookie_store_enable: bool = match dict.get_item("cookie_store_enable"){
+                        Ok(op_py_any) => {
+                            match op_py_any {
+                                None => {
+                                    true
+                                }
+                                Some(py_any) => {
+                                    let pyobj = py_any.to_object(py);
+                                    match from_pyobject(pyobj.as_ref(py)) {
+                                        Ok(val) => val,
+                                        Err(e) =>{
+                                            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
+                                                "Error: {:?}",
+                                                e
+                                            )))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e)))
+                        }
+                    };
+
                     setup_options.push(models::setup::SetupApiEndpoint{
                         name,
                         url,
@@ -131,6 +156,7 @@ pub fn new(
                         headers,
                         cookies,
                         jsonpath_extract,
+                        cookie_store_enable
                     })
                 }
             };
