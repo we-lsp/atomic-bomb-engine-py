@@ -13,6 +13,8 @@ setup_options=None,
 verbose=false,
 should_prevent=false,
 assert_channel_buffer_size=1024,
+timeout_secs=0,
+cookie_store_enable=true,
 ))]
 pub(crate) fn batch_async<'a>(
     py: Python<'a>,
@@ -24,6 +26,8 @@ pub(crate) fn batch_async<'a>(
     verbose: bool,
     should_prevent: bool,
     assert_channel_buffer_size: usize,
+    timeout_secs: u64,
+    cookie_store_enable: bool,
 ) -> PyResult<&'a PyAny> {
     let endpoints = utils::parse_api_endpoints::new(py, api_endpoints)?;
     let step_opt = utils::parse_step_options::new(step_option)?;
@@ -33,6 +37,8 @@ pub(crate) fn batch_async<'a>(
         let result = atomic_bomb_engine::core::batch::batch(
             test_duration_secs,
             concurrent_requests,
+            timeout_secs,
+            cookie_store_enable,
             verbose,
             should_prevent,
             endpoints,

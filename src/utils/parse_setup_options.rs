@@ -66,23 +66,6 @@ pub fn new(
                         }
                     };
 
-                    let timeout_secs: u64 = match dict.get_item("timeout_secs") {
-                        Ok(timeout_secs) => match timeout_secs {
-                            None => {
-                                return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                                    "timeout_secs不能为空".to_string(),
-                                ))
-                            }
-                            Some(timeout_secs) => timeout_secs.to_string().parse()?,
-                        },
-                        Err(e) => {
-                            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                                "Error: {:?}",
-                                e
-                            )))
-                        }
-                    };
-
                     let json_obj: PyObject = dict.get_item("json").unwrap().to_object(py);
                     let json: Option<Value> = match from_pyobject(json_obj.as_ref(py)) {
                         Ok(val) => val,
@@ -154,42 +137,15 @@ pub fn new(
                         }
                     };
 
-                    let cookie_store_enable: bool = match dict.get_item("cookie_store_enable") {
-                        Ok(op_py_any) => match op_py_any {
-                            None => true,
-                            Some(py_any) => {
-                                let pyobj = py_any.to_object(py);
-                                match from_pyobject(pyobj.as_ref(py)) {
-                                    Ok(val) => val,
-                                    Err(e) => {
-                                        return Err(
-                                            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                                                format!("Error: {:?}", e),
-                                            ),
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        Err(e) => {
-                            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                                "Error: {:?}",
-                                e
-                            )))
-                        }
-                    };
-
                     setup_options.push(models::setup::SetupApiEndpoint {
                         name,
                         url,
                         method,
-                        timeout_secs,
                         json,
                         form_data,
                         headers,
                         cookies,
                         jsonpath_extract,
-                        cookie_store_enable,
                     })
                 }
             }

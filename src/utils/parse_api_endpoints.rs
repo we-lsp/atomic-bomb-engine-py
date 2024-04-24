@@ -63,23 +63,6 @@ pub fn new(py: Python, api_endpoints: &PyList) -> PyResult<Vec<models::api_endpo
                 }
             };
 
-            let timeout_secs: u64 = match dict.get_item("timeout_secs") {
-                Ok(timeout_secs) => match timeout_secs {
-                    None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "timeout_secs不能为空".to_string(),
-                        ))
-                    }
-                    Some(timeout_secs) => timeout_secs.to_string().parse()?,
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
-
             let weight: u32 = match dict.get_item("weight") {
                 Ok(weight) => match weight {
                     None => {
@@ -214,7 +197,6 @@ pub fn new(py: Python, api_endpoints: &PyList) -> PyResult<Vec<models::api_endpo
                 name,
                 url,
                 method,
-                timeout_secs,
                 weight,
                 json,
                 form_data,

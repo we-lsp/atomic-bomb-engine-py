@@ -6,8 +6,6 @@ use pyo3::{pyfunction, PyObject, PyResult, Python};
 name,
 url,
 method,
-timeout_secs=0,
-cookie_store_enable=true,
 json=None,
 form_data=None,
 headers=None,
@@ -19,8 +17,6 @@ pub(crate) fn setup_option(
     name: String,
     url: String,
     method: String,
-    timeout_secs: u64,
-    cookie_store_enable: bool,
     json: Option<PyObject>,
     form_data: Option<PyObject>,
     headers: Option<PyObject>,
@@ -31,8 +27,6 @@ pub(crate) fn setup_option(
     dict.set_item("name", name)?;
     dict.set_item("url", url)?;
     dict.set_item("method", method)?;
-    dict.set_item("timeout_secs", timeout_secs)?;
-    dict.set_item("cookie_store_enable", cookie_store_enable)?;
     if let Some(json) = json {
         dict.set_item("json", json)?;
     };

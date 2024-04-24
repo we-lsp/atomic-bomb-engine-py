@@ -6,7 +6,6 @@ use pyo3::{pyfunction, PyObject, PyResult, Python};
 name,
 url,
 method,
-timeout_secs,
 weight,
 json=None,
 form_data=None,
@@ -21,7 +20,6 @@ pub(crate) fn endpoint(
     name: String,
     url: String,
     method: String,
-    timeout_secs: u64,
     weight: u32,
     json: Option<PyObject>,
     form_data: Option<PyObject>,
@@ -35,7 +33,6 @@ pub(crate) fn endpoint(
     dict.set_item("name", name)?;
     dict.set_item("url", url)?;
     dict.set_item("method", method)?;
-    dict.set_item("timeout_secs", timeout_secs)?;
     dict.set_item("weight", weight)?;
     if let Some(json) = json {
         dict.set_item("json", json)?;

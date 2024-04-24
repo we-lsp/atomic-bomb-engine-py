@@ -29,7 +29,6 @@ def endpoint(
          name: str,
          url: str,
          method: str,
-         timeout_secs: int,
          weight: int,
          json: Dict | None = None,
          form_data: Dict | None = None,
@@ -46,7 +45,6 @@ def endpoint(
     :param name: 接口名称
     :param url: 接口地址
     :param method: 请求方法
-    :param timeout_secs: 超时时间(秒)
     :param weight 权重
     :param json: 请求json
     :param form_data: 请求form表单
@@ -79,8 +77,6 @@ def setup_option(
         name: str,
         url: str,
         method: str,
-        timeout_secs: int,
-        cookie_store_enable: bool = True,
         json: Dict| None = None,
         form_data: Dict| None = None,
         headers: Dict| None = None,
@@ -91,8 +87,6 @@ def setup_option(
     :param name: 接口名称
     :param url: 接口地址
     :param method: 请求方法
-    :param timeout_secs: 超时秒数
-    :param cookie_store_enable: 是否为客户端启用持久性cookie存储
     :param json: 请求json
     :param form_data: 请求form表单
     :param headers: 请求头
@@ -118,6 +112,8 @@ async def batch_async(
              verbose:bool=False,
              should_prevent:bool=False,
              assert_channel_buffer_size:int=1024,
+             timeout_secs=0,
+             cookie_store_enable=True
 ) ->Dict:
     """
         批量压测
@@ -129,4 +125,6 @@ async def batch_async(
         :param verbose: 打印详细信息
         :param should_prevent: 是否禁用睡眠
         :param assert_channel_buffer_size: 断言队列buffer大小
+        :param timeout_secs: http超时时间
+        :param cookie_store_enable: 是否为客户端启用持久性cookie存储。
     """
