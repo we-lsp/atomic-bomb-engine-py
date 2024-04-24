@@ -2,6 +2,10 @@ use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyObject, PyResult, Python, ToPyObject};
 
 #[pyfunction]
+#[pyo3(signature=(
+min_millis,
+max_millis,
+))]
 pub(crate) fn think_time_option(
     py: Python,
     min_millis: u64,

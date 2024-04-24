@@ -2,6 +2,10 @@ use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyObject, PyResult, Python, ToPyObject};
 
 #[pyfunction]
+#[pyo3(signature=(
+jsonpath,
+reference_object,
+))]
 pub(crate) fn assert_option(
     py: Python,
     jsonpath: String,

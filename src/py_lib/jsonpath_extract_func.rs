@@ -2,6 +2,10 @@ use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyObject, PyResult, Python, ToPyObject};
 
 #[pyfunction]
+#[pyo3(signature=(
+key,
+jsonpath,
+))]
 pub(crate) fn jsonpath_extract_option(
     py: Python,
     key: String,

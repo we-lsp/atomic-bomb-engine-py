@@ -2,6 +2,10 @@ use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyObject, PyResult, Python, ToPyObject};
 
 #[pyfunction]
+#[pyo3(signature=(
+increase_step,
+increase_interval,
+))]
 pub(crate) fn step_option(
     py: Python,
     increase_step: usize,

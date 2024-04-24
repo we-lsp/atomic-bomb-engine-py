@@ -80,7 +80,7 @@ def setup_option(
         url: str,
         method: str,
         timeout_secs: int,
-        cookie_store_enable: bool,
+        cookie_store_enable: bool = True,
         json: Dict| None = None,
         form_data: Dict| None = None,
         headers: Dict| None = None,

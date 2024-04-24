@@ -2,6 +2,20 @@ use pyo3::types::{PyDict, PyList};
 use pyo3::{pyfunction, PyObject, PyResult, Python};
 
 #[pyfunction]
+#[pyo3(signature=(
+name,
+url,
+method,
+timeout_secs,
+weight,
+json=None,
+form_data=None,
+headers=None,
+cookies=None,
+assert_options=None,
+think_time_option=None,
+setup_options=None,
+))]
 pub(crate) fn endpoint(
     py: Python,
     name: String,

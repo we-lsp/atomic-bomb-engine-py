@@ -2,6 +2,18 @@ use pyo3::types::{PyDict, PyList};
 use pyo3::{pyfunction, PyObject, PyResult, Python};
 
 #[pyfunction]
+#[pyo3(signature=(
+name,
+url,
+method,
+timeout_secs=0,
+cookie_store_enable=true,
+json=None,
+form_data=None,
+headers=None,
+cookies=None,
+jsonpath_extract=None,
+))]
 pub(crate) fn setup_option(
     py: Python,
     name: String,
