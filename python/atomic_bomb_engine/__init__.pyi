@@ -37,6 +37,7 @@ def endpoint(
          cookies: str | None = None,
          assert_options: List | None = None,
          think_time_option: Dict[str, int] | None = None,
+         setup_options: List| None = None,
          ) -> Dict[str, Any]:
     """
     生成endpoint
@@ -53,6 +54,7 @@ def endpoint(
     :param cookies: cookie
     :param assert_options: 断言参数
     :param think_time_option: 思考时间
+    :param setup_options: 接口初始化选项
     """
 
 
@@ -78,6 +80,7 @@ def setup_option(
         url: str,
         method: str,
         timeout_secs: int,
+        cookie_store_enable: bool,
         json: Dict| None = None,
         form_data: Dict| None = None,
         headers: Dict| None = None,
@@ -89,6 +92,7 @@ def setup_option(
     :param url: 接口地址
     :param method: 请求方法
     :param timeout_secs: 超时秒数
+    :param cookie_store_enable: 是否为客户端启用持久性cookie存储
     :param json: 请求json
     :param form_data: 请求form表单
     :param headers: 请求头

@@ -13,7 +13,8 @@ pub(crate) fn endpoint(py: Python,
             headers: Option<PyObject>,
             cookies: Option<String>,
             assert_options: Option<&PyList>,
-            think_time_option: Option<PyObject>
+            think_time_option: Option<PyObject>,
+            setup_options: Option<&PyList>,
 ) -> PyResult<PyObject>{
     let dict = PyDict::new(py);
     dict.set_item("name", name)?;
@@ -39,5 +40,8 @@ pub(crate) fn endpoint(py: Python,
     if let Some(think_time_option) = think_time_option{
         dict.set_item("think_time_option", think_time_option)?;
     };
+    if let Some(setup_options) = setup_options {
+        dict.set_item("setup_options", setup_options)?;
+    }
     Ok(dict.into())
 }
