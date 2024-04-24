@@ -41,19 +41,27 @@ async def batch_async(
         test_duration_secs: int,
         concurrent_requests: int,
         api_endpoints:List[Dict],
-        step_option:Dict[str, int]=None,
+        step_option:Dict[str, int]|None=None,
+        setup_options:List[Dict[str, Any]]|None=None,
         verbose:bool=False,
-        should_prevent:bool=False) ->Dict:
+        should_prevent:bool=False,
+        assert_channel_buffer_size:int=1024,
+        timeout_secs=0,
+        cookie_store_enable=True
+) ->Dict:
   """
       批量压测
       :param test_duration_secs: 测试持续时间
       :param concurrent_requests: 并发数
       :param api_endpoints: 接口信息
       :param step_option: 阶梯加压选项
+      :param setup_options: 初始化选项
       :param verbose: 打印详细信息
       :param should_prevent: 是否禁用睡眠
+      :param assert_channel_buffer_size: 断言队列buffer大小
+      :param timeout_secs: http超时时间
+      :param cookie_store_enable: 是否为客户端启用持久性cookie存储。
   """
-
  ```
 
 使用assert_option方法可以返回断言选项字典
@@ -77,27 +85,66 @@ def step_option(increase_step: int, increase_interval: int) -> Dict[str, int]:
 
 同样的本包中也包含了一个对api_endpoint的包装：endpoint方法，方便调用，endpoint中的assert_options中也可以套用assert_option方法
  ```python
-    async def run_batch():
-        result = await atomic_bomb_engine.batch_async(
-            test_duration_secs=10,
-            concurrent_requests=10,
-            api_endpoints=[
-                atomic_bomb_engine.endpoint(
-                    name="test1",
-                    url="https:xxxxx1.xx",
-                    method="get",
-                    weight=1,
-                    timeout_secs=10,
-                    assert_options=[atomic_bomb_engine.assert_option(jsonpath="$.code", reference_object=200)]
-                ),
-                atomic_bomb_engine.endpoint(
-                    name="test2",
-                    url="https://xxxxx2.xx",
-                    method="get",
-                    weight=1,
-                    timeout_secs=10)
-            ])
-        print(result)
+async def run_batch():
+  result = await atomic_bomb_engine.batch_async(
+    # 测试持续时间
+    test_duration_secs=60,
+    # 并发量
+    concurrent_requests=200,
+    # 阶梯设置（每5秒增加30个并发）
+    step_option=atomic_bomb_engine.step_option(increase_step=30, increase_interval=5),
+    # 接口超时时间
+    timeout_secs=10,
+    # 是否开启客户端启用持久性cookie存储
+    cookie_store_enable=True,
+    # 全局初始化
+    setup_options=[
+      atomic_bomb_engine.setup_option(
+        name="初始化-1",
+        url="http://localhost:8080/setup",
+        method="get",
+        jsonpath_extract=[
+          atomic_bomb_engine.jsonpath_extract_option(key="test-msg", jsonpath="$.msg"),
+          atomic_bomb_engine.jsonpath_extract_option(key="test-code", jsonpath="$.code"),
+        ]
+      )],
+    # 是否开启详细日志
+    verbose=False,
+    # 被压接口设置
+    api_endpoints=[
+      atomic_bomb_engine.endpoint(
+        # 接口任务命名
+        name="test-1",
+        # 针对每个接口初始化
+        setup_options=[
+          atomic_bomb_engine.setup_option(
+            name="api-初始化-1",
+            url="http://localhost:8080/api_setup",
+            method="get",
+            jsonpath_extract=[
+              atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-1", jsonpath="$.msg"),
+              atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-1", jsonpath="$.code"),
+            ]
+          )
+        ],
+        # 被压接口url
+        url="http://localhost:8080/direct",
+        # 请求方式
+        method="POST",
+        # 权重
+        weight=1,
+        # 发送json请求
+        json={"name": "{{api-test-msg-1}}", "number": 1},
+        # 断言选项
+        assert_options=[
+          atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
+        ],
+        # 思考时间选项（在最大和最小之间随机，单位毫秒）
+        think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
+      ),
+    ])
+  print(result)
+  return result
  ```
     
 监听时可以使用BatchListenIter生成器
@@ -140,16 +187,65 @@ from atomic_bomb_engine import server
 
 @server.ui(port=8000)
 async def run_batch():
-    result = await atomic_bomb_engine.batch_async(
-        test_duration_secs=120,
-        concurrent_requests=100,
-        verbose=False,
-        api_endpoints=[
-            atomic_bomb_engine.endpoint(name="test-baidu",url="https://baidu.com",method="GET",weight=1,timeout_secs=10),
-            atomic_bomb_engine.endpoint(name="test-google", url="https://google.com", method="GET", weight=1, timeout_secs=10),
-        ])
-    print(result)
-    return result
+  result = await atomic_bomb_engine.batch_async(
+    # 测试持续时间
+    test_duration_secs=60,
+    # 并发量
+    concurrent_requests=200,
+    # 阶梯设置（每5秒增加30个并发）
+    step_option=atomic_bomb_engine.step_option(increase_step=30, increase_interval=5),
+    # 接口超时时间
+    timeout_secs=10,
+    # 是否开启客户端启用持久性cookie存储
+    cookie_store_enable=True,
+    # 全局初始化
+    setup_options=[
+      atomic_bomb_engine.setup_option(
+        name="初始化-1",
+        url="http://localhost:8080/setup",
+        method="get",
+        jsonpath_extract=[
+          atomic_bomb_engine.jsonpath_extract_option(key="test-msg", jsonpath="$.msg"),
+          atomic_bomb_engine.jsonpath_extract_option(key="test-code", jsonpath="$.code"),
+        ]
+      )],
+    # 是否开启详细日志
+    verbose=False,
+    # 被压接口设置
+    api_endpoints=[
+      atomic_bomb_engine.endpoint(
+        # 接口任务命名
+        name="test-1",
+        # 针对每个接口初始化
+        setup_options=[
+          atomic_bomb_engine.setup_option(
+            name="api-初始化-1",
+            url="http://localhost:8080/api_setup",
+            method="get",
+            jsonpath_extract=[
+              atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-1", jsonpath="$.msg"),
+              atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-1", jsonpath="$.code"),
+            ]
+          )
+        ],
+        # 被压接口url
+        url="http://localhost:8080/direct",
+        # 请求方式
+        method="POST",
+        # 权重
+        weight=1,
+        # 发送json请求
+        json={"name": "{{api-test-msg-1}}", "number": 1},
+        # 断言选项
+        assert_options=[
+          atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
+        ],
+        # 思考时间选项（在最大和最小之间随机，单位毫秒）
+        think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
+      ),
+    ])
+  print(result)
+  return result
 
 
 if __name__ == '__main__':
@@ -166,30 +262,51 @@ if __name__ == '__main__':
 - 增加了初始化和参数模版功能
 ```python
 setup_options=[
-            atomic_bomb_engine.setup_option(
-                name="初始化-1",
-                url="https://xxx.xxx/api/short/v1/list",
-                method="get",
-                timeout_secs=10,
-                jsonpath_extract=[
-                    atomic_bomb_engine.jsonpath_extract_option(key="test-msg", jsonpath="$.msg"),
-                    atomic_bomb_engine.jsonpath_extract_option(key="test-code", jsonpath="$.code"),
-                ]
-            )],
+  atomic_bomb_engine.setup_option(
+    name="初始化-1",
+    url="http://localhost:8080/setup",
+    method="get",
+    jsonpath_extract=[
+      atomic_bomb_engine.jsonpath_extract_option(key="test-msg", jsonpath="$.msg"),
+      atomic_bomb_engine.jsonpath_extract_option(key="test-code", jsonpath="$.code"),
+    ]
+  )]
 ```
 上述实例展示了如何在初始化的时候调用某个接口，并且通过jsonpath将数据提取出来，保存在全局变量test-msg和test-code中
 提取完全局变量后，就可以在后续的api_endpoints中使用
 ```python
 api_endpoints=[
-        atomic_bomb_engine.endpoint(
-            name="test-1",
-            url="http://127.0.0.1:8000/a",
-            method="POST",
-            weight=1,
-            timeout_secs=10,
-            json={"name": "{{test-msg}}", "number": "{{test-code}}"},
-        ),
-    ]
+  atomic_bomb_engine.endpoint(
+    # 接口任务命名
+    name="test-1",
+    # 针对每个接口初始化
+    setup_options=[
+      atomic_bomb_engine.setup_option(
+        name="api-初始化-1",
+        url="http://localhost:8080/api_setup",
+        method="get",
+        jsonpath_extract=[
+          atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-1", jsonpath="$.msg"),
+          atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-1", jsonpath="$.code"),
+        ]
+      )
+    ],
+    # 被压接口url
+    url="http://localhost:8080/direct",
+    # 请求方式
+    method="POST",
+    # 权重
+    weight=1,
+    # 发送json请求
+    json={"name": "{{api-test-msg-1}}", "number": 1},
+    # 断言选项
+    assert_options=[
+      atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
+    ],
+    # 思考时间选项（在最大和最小之间随机，单位毫秒）
+    think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
+  ),
+]
 ```
 上述实例展示了如何在请求中使用全局变量，使用双大括号即可使用
 
@@ -229,7 +346,7 @@ think_time_option(min_millis=200, max_millis=300)
 api_endpoints=[
   atomic_bomb_engine.endpoint(
     name="test-1",
-    url="http://127.0.0.1:8000/a",
+    url="http://localhost:8080/a",
     method="POST",
     weight=1,
     timeout_secs=10,
@@ -245,40 +362,34 @@ api_endpoints=[
 - 增加有关联条件下的cookie自动管理功能
 ```python
 atomic_bomb_engine.endpoint(
-  name="test-xxx",
-  url="http://localhost:8080/direct",
-  method="POST",
-  weight=1,
-  timeout_secs=10,
-  json={"name": "{{test-msg}}", "number": 1},
-  assert_options=[
-    atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
-  ],
-  think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
+  # 接口任务命名
+  name="test-1",
+  # 针对每个接口初始化
   setup_options=[
     atomic_bomb_engine.setup_option(
-      name="初始化-1",
-      url="http://localhost:8080/1",
+      name="api-初始化-1",
+      url="http://localhost:8080/api_setup",
       method="get",
-      timeout_secs=10,
-      cookie_store_enable=True,
       jsonpath_extract=[
         atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-1", jsonpath="$.msg"),
         atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-1", jsonpath="$.code"),
       ]
-    ),
-    atomic_bomb_engine.setup_option(
-      name="初始化-2",
-      url="http://localhost:8080/2",
-      method="get",
-      timeout_secs=10,
-      cookie_store_enable=True,
-      jsonpath_extract=[
-        atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-2", jsonpath="$.msg"),
-        atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-2", jsonpath="$.code"),
-      ]
     )
-  ]
+  ],
+  # 被压接口url
+  url="http://localhost:8080/direct",
+  # 请求方式
+  method="POST",
+  # 权重
+  weight=1,
+  # 发送json请求
+  json={"name": "{{api-test-msg-1}}", "number": 1},
+  # 断言选项
+  assert_options=[
+    atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
+  ],
+  # 思考时间选项（在最大和最小之间随机，单位毫秒）
+  think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
 )
 ```
 - 参数cookie_store_enable控制是否自动管理cookie，前置条件的cookie会带入到最终的压测接口中
@@ -287,6 +398,12 @@ atomic_bomb_engine.endpoint(
 - 接口中提取的参数只能在本线程（v-user）中使用
 - ⚠️ 使用时注意:setup_options是顺序执行的，没有并发，但是相当于添加了think time
 
+## [0.27.0] - 2024-04-24
+### Added
+- 将持久化cookie添加到全局选项中
+- 复用http client
+- 选择性开启断言任务
+- 接口初始化时出现错误等待后重试
 
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
