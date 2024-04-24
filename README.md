@@ -239,6 +239,55 @@ api_endpoints=[
 ]
 ```
 
+## [0.26.0] - 2024-04-24
+### Added
+- 增加endpoint中的setup，在并发中可以做接口断言
+- 增加有关联条件下的cookie自动管理功能
+```python
+atomic_bomb_engine.endpoint(
+  name="test-xxx",
+  url="http://localhost:8080/direct",
+  method="POST",
+  weight=1,
+  timeout_secs=10,
+  json={"name": "{{test-msg}}", "number": 1},
+  assert_options=[
+    atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
+  ],
+  think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
+  setup_options=[
+    atomic_bomb_engine.setup_option(
+      name="初始化-1",
+      url="http://localhost:8080/1",
+      method="get",
+      timeout_secs=10,
+      cookie_store_enable=True,
+      jsonpath_extract=[
+        atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-1", jsonpath="$.msg"),
+        atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-1", jsonpath="$.code"),
+      ]
+    ),
+    atomic_bomb_engine.setup_option(
+      name="初始化-2",
+      url="http://localhost:8080/2",
+      method="get",
+      timeout_secs=10,
+      cookie_store_enable=True,
+      jsonpath_extract=[
+        atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-2", jsonpath="$.msg"),
+        atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-2", jsonpath="$.code"),
+      ]
+    )
+  ]
+)
+```
+- 参数cookie_store_enable控制是否自动管理cookie，前置条件的cookie会带入到最终的压测接口中
+- 在endpoint中使用setup_options可以传入多个接口，并且提取参数
+- 提取到的参数如果和全局的setup的key冲突，会覆盖全局提取到的参数
+- 接口中提取的参数只能在本线程（v-user）中使用
+- ⚠️ 使用时注意:setup_options是顺序执行的，没有并发，但是相当于添加了think time
+
+
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
 - 如果有需求也可以在Issues中讨论
@@ -249,6 +298,7 @@ api_endpoints=[
 - [x] 接口关联 ✅
 - [x] 每个接口可以配置思考时间 ✅
 - [x] 增加form支持 ✅
+- [ ] 增加代理支持
 - [ ] 增加附件支持
 - [ ] 断言支持不等于等更多表达方式
 
