@@ -41,7 +41,7 @@ jobs:
         run: cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
 
       - name: 设置python环境
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
