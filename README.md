@@ -403,7 +403,12 @@ atomic_bomb_engine.endpoint(
 - 将持久化cookie添加到全局选项中
 - 复用http client
 - 选择性开启断言任务
-- 接口初始化时出现错误等待后重试
+- 接口初始化时出现错误等待后重试##
+
+[0.29.0] - 2024-04-25
+### Added
+- 优化并发逻辑
+- 前端更改为web worker发送心跳
 
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
