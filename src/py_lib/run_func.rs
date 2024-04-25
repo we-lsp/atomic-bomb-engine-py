@@ -1,7 +1,7 @@
-use pyo3::{PyErr, pyfunction, PyObject, PyResult, Python};
-use pyo3::types::{PyDict, PyList};
-use tokio::runtime::Runtime;
 use crate::utils;
+use pyo3::types::{PyDict, PyList};
+use pyo3::{pyfunction, PyErr, PyObject, PyResult, Python};
+use tokio::runtime::Runtime;
 
 #[pyfunction]
 #[pyo3(signature = (
@@ -30,8 +30,8 @@ pub(crate) fn run(
     form_data_str: Option<String>,
     headers: Option<Vec<String>>,
     cookie: Option<String>,
-    should_prevent:bool,
-    assert_options: Option<&PyList>
+    should_prevent: bool,
+    assert_options: Option<&PyList>,
 ) -> PyResult<PyObject> {
     let options = utils::parse_assert_options::new(py, assert_options)?;
     let rt = Runtime::new().unwrap();
@@ -48,8 +48,9 @@ pub(crate) fn run(
             headers,
             cookie,
             should_prevent,
-            options
-        ).await
+            options,
+        )
+        .await
     });
 
     match result {
@@ -66,14 +67,24 @@ pub(crate) fn run(
             dict.set_item("min_response_time", test_result.min_response_time)?;
             dict.set_item("err_count", test_result.err_count)?;
             dict.set_item("total_data_kb", test_result.total_data_kb)?;
-            dict.set_item("throughput_per_second_kb", test_result.throughput_per_second_kb)?;
-            let http_error_list = utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
+            dict.set_item(
+                "throughput_per_second_kb",
+                test_result.throughput_per_second_kb,
+            )?;
+            let http_error_list =
+                utils::create_http_err_dict::create_http_error_dict(py, &test_result.http_errors)?;
             dict.set_item("http_errors", http_error_list)?;
-            let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(py, &test_result.assert_errors)?;
+            let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(
+                py,
+                &test_result.assert_errors,
+            )?;
             dict.set_item("assert_errors", assert_error_list)?;
             dict.set_item("timestamp", test_result.timestamp)?;
             Ok(dict.into())
-        },
-        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Error: {:?}", e))),
+        }
+        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
+            "Error: {:?}",
+            e
+        ))),
     }
 }

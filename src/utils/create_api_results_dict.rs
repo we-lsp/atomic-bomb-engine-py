@@ -1,6 +1,6 @@
 use atomic_bomb_engine::models::result::ApiResult;
-use pyo3::{PyResult, Python};
 use pyo3::types::{PyDict, PyList};
+use pyo3::{PyResult, Python};
 pub fn create_api_results_dict(py: Python, api_results: Vec<ApiResult>) -> PyResult<&PyList> {
     if api_results.is_empty() {
         return Ok(PyList::empty(py));
