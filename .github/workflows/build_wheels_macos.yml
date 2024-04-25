@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         arch: ['x86_64-apple-darwin', 'aarch64-apple-darwin']
-        python-version: ['3.8.18', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
     steps:
       - name: 签出rust代码
@@ -41,7 +41,7 @@ jobs:
         run: cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
 
       - name: 设置python环境
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
