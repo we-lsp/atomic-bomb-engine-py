@@ -1,6 +1,6 @@
 [package]
 name = "atomic-bomb-engine-py"
-version = "0.27.0"
+version = "0.28.0"
 edition = "2021"
 
 [lib]
@@ -10,8 +10,8 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-atomic-bomb-engine = "0.17.2"
-# atomic-bomb-engine = { git = "https://github.com/we-lsp/atomic-bomb-engine.git", branch = "setup-retry"}
+atomic-bomb-engine = "0.18.0"
+# atomic-bomb-engine = { git = "https://github.com/we-lsp/atomic-bomb-engine.git", branch = "async-share-result"}
 tokio = "1.36.0"
 pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime"] }
 serde = { version = "1.0", features = ["derive"] }

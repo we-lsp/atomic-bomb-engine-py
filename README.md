@@ -398,7 +398,7 @@ atomic_bomb_engine.endpoint(
 - 接口中提取的参数只能在本线程（v-user）中使用
 - ⚠️ 使用时注意:setup_options是顺序执行的，没有并发，但是相当于添加了think time
 
-## [0.27.0] - 2024-04-24
+## [0.28.0] - 2024-04-25
 ### Added
 - 将持久化cookie添加到全局选项中
 - 复用http client
