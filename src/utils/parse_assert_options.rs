@@ -4,7 +4,7 @@ use pyo3::types::{PyDict, PyList};
 use serde_json::Value;
 use serde_pyobject::from_pyobject;
 
-pub fn new(
+pub fn _new(
     py: Python,
     assert_options: Option<&PyList>,
 ) -> PyResult<Option<Vec<models::assert_option::AssertOption>>> {
