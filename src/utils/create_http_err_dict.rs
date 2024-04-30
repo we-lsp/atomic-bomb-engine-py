@@ -1,7 +1,7 @@
+use atomic_bomb_engine::models::http_error_stats::HttpErrKey;
 use pyo3::types::{PyDict, PyList};
 use pyo3::{PyResult, Python};
 use std::collections::HashMap;
-use atomic_bomb_engine::models::http_error_stats::HttpErrKey;
 
 pub fn create_http_error_dict<'py>(
     py: Python<'py>,
@@ -18,6 +18,8 @@ pub fn create_http_error_dict<'py>(
         http_error_dict.set_item("code", http_error_key_clone.code)?;
         http_error_dict.set_item("message", http_error_key_clone.msg)?;
         http_error_dict.set_item("url", http_error_key_clone.url)?;
+        http_error_dict.set_item("host", http_error_key_clone.host)?;
+        http_error_dict.set_item("path", http_error_key_clone.path)?;
         http_error_dict.set_item("source", http_error_key_clone.source)?;
         http_error_dict.set_item("count", count)?;
         http_errors_list.push(http_error_dict)
