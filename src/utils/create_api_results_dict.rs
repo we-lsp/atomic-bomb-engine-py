@@ -13,6 +13,8 @@ pub fn create_api_results_dict(py: Python, api_results: Vec<ApiResult>) -> PyRes
 
         res_dict.set_item("name", result.name)?;
         res_dict.set_item("url", result.url)?;
+        res_dict.set_item("host", result.host)?;
+        res_dict.set_item("path", result.path)?;
         res_dict.set_item("method", result.method)?;
         res_dict.set_item("success_rate", result.success_rate)?;
         res_dict.set_item("error_rate", result.error_rate)?;
