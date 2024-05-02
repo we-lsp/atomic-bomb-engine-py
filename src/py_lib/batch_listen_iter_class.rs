@@ -83,6 +83,7 @@ impl BatchListenIter {
                 "total_concurrent_number",
                 test_result.total_concurrent_number,
             )?;
+            dict.set_item("errors_per_second", test_result.errors_per_second)?;
             Ok(Some(dict.to_object(py)))
         } else {
             Ok(Some(py.None()))

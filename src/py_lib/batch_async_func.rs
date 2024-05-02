@@ -87,6 +87,7 @@ pub(crate) fn batch_async<'a>(
                     test_result.api_results,
                 )?;
                 dict.set_item("api_results", api_results)?;
+                dict.set_item("errors_per_second", test_result.errors_per_second)?;
                 Ok(dict.to_object(py))
             }
             Err(e) => Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
