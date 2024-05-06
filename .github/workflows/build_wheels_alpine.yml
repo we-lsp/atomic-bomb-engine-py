@@ -9,9 +9,12 @@ jobs:
   build-wheels:
     name: Build wheels on Alpine
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8.10, 3.9.7, 3.10.5, 3.11.0, 3.12.0]
 
     steps:
-      - name: 签出rust代码
+      - name: 签出代码
         uses: actions/checkout@v2
 
       - name: 签出前端
@@ -20,11 +23,11 @@ jobs:
           repository: GiantAxeWhy/atomic-bomb-engine-front
           path: vue-project
 
-      - name: 启动 Python Alpine 容器
+      - name: 启动 Alpine 容器
         run: |
-          docker run --name python-alpine-container -d -v "${{ github.workspace }}:/__w" -w "/__w" python:3.12-alpine sleep 3600
+          docker run --name python-alpine-container -d -v "${{ github.workspace }}:/__w" -w "/__w" alpine:latest sleep 3600
 
-      - name: 安装Node.js和构建工具
+      - name: 安装 Node.js 和构建工具
         run: |
           docker exec python-alpine-container apk add --no-cache nodejs npm build-base
 
@@ -32,27 +35,25 @@ jobs:
         run: |
           docker exec python-alpine-container sh -c "cd vue-project && npm install && npm run build"
 
-      - name: 删除现有的dist目录
-        run: docker exec python-alpine-container rm -rf python/atomic_bomb_engine/dist/*
-
-      - name: 将dist复制到Python项目
-        run: docker exec python-alpine-container cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
+      - name: 安装 pyenv 和指定版本的 Python
+        run: |
+          docker exec python-alpine-container apk add --no-cache bash git curl openssl-dev bzip2-dev zlib-dev readline-dev sqlite-dev
+          docker exec python-alpine-container sh -c "curl https://pyenv.run | bash"
+          docker exec python-alpine-container sh -c 'export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)" && for version in ${{ join(matrix.python-version, ' ') }}; do pyenv install $version; done'
 
       - name: 安装 Rust、maturin 和 patchelf
         run: |
-          docker exec python-alpine-container apk add --no-cache openssl-dev pkgconfig rust cargo patchelf
+          docker exec python-alpine-container apk add --no-cache rust cargo patchelf
           docker exec python-alpine-container pip install maturin
 
-      - name: 安装依赖和工具
+      - name: 使用 maturin 构建 wheels
         run: |
-          docker exec python-alpine-container apk add --no-cache openssl-dev pkgconfig rust cargo
-          docker exec python-alpine-container pip install maturin
-
-      - name: 使用 maturin 构建代码
-        env:
-          OPENSSL_DIR: /usr/lib
-        run: |
-          docker exec python-alpine-container sh -c "maturin build --release"
+          docker exec python-alpine-container sh -c '
+            export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)"
+            for version in ${{ join(matrix.python-version, ' ') }}; do
+              pyenv global $version
+              maturin build --release
+            done'
 
       - name: 复制 wheels 到 Runner
         run: docker cp python-alpine-container:/__w/target/wheels ./
