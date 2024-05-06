@@ -38,9 +38,9 @@ jobs:
       - name: 将dist复制到Python项目
         run: docker exec python-alpine-container cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
 
-      - name: 安装 Rust 和 maturin
+      - name: 安装 Rust、maturin 和 patchelf
         run: |
-          docker exec python-alpine-container apk add rust cargo
+          docker exec python-alpine-container apk add --no-cache openssl-dev pkgconfig rust cargo patchelf
           docker exec python-alpine-container pip install maturin
 
       - name: 安装依赖和工具
