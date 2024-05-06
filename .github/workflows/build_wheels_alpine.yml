@@ -54,11 +54,14 @@ jobs:
         run: |
           docker exec python-alpine-container sh -c "maturin build --release"
 
-      - name: 安装 Twine 并上传
+      - name: 复制 wheels 到 Runner
+        run: docker cp python-alpine-container:/__w/target/wheels ./
+
+      - name: 安装 Twine
+        run: pip install twine
+
+      - name: 上传 wheels 到 PyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-          TWINE_NON_INTERACTIVE: 1
-        run: |
-          docker exec python-alpine-container pip install twine
-          docker exec python-alpine-container twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
+        run: twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ wheels/*.whl
