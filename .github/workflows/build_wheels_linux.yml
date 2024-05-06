@@ -10,8 +10,29 @@ jobs:
     name: Build wheels on Ubuntu
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        include:
+          - python-version: '3.8'
+            target: 'x86_64-unknown-linux-gnu'
+          - python-version: '3.9'
+            target: 'x86_64-unknown-linux-gnu'
+          - python-version: '3.10'
+            target: 'x86_64-unknown-linux-gnu'
+          - python-version: '3.11'
+            target: 'x86_64-unknown-linux-gnu'
+          - python-version: '3.12'
+            target: 'x86_64-unknown-linux-gnu'
+          - python-version: '3.8'
+            target: 'x86_64-unknown-linux-musl'
+          - python-version: '3.9'
+            target: 'x86_64-unknown-linux-musl'
+          - python-version: '3.10'
+            target: 'x86_64-unknown-linux-musl'
+          - python-version: '3.11'
+            target: 'x86_64-unknown-linux-musl'
+          - python-version: '3.12'
+            target: 'x86_64-unknown-linux-musl'
 
     steps:
       - name: 签出rust代码
@@ -50,13 +71,14 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+          target: ${{ matrix.target }}
           override: true
 
       - name: 安装maturin
         run: pip install maturin
 
       - name: 构建wheels
-        run: maturin build --release --interpreter python${{ matrix.python-version }}
+        run: maturin build --release --interpreter python${{ matrix.python-version }} --manylinux off --target ${{ matrix.target }}
 
       - name: 安装Twine
         run: pip install twine
