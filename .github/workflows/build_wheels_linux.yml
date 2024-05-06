@@ -21,6 +21,13 @@ jobs:
           sudo apt install -y musl-dev
           sudo apt install -y libssl-dev
 
+      - name: 查找 OpenSSL 头文件和库文件
+        run: |
+          echo "查找 opensslconf.h 文件..."
+          find /usr -name opensslconf.h
+          echo "查找 libssl 库文件..."
+          find /usr -name libssl.so
+
       - name: 配置环境变量 (通用)
         run: |
           echo "OPENSSL_DIR=/usr/include/openssl" >> $GITHUB_ENV
