@@ -9,14 +9,6 @@ jobs:
   build-wheels:
     name: Build wheels on Alpine
     runs-on: ubuntu-latest
-    services:
-      alpine:
-        image: alpine:latest
-        options: --volume /__w:/__w --workdir /__w
-
-    strategy:
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
     steps:
       - name: 签出rust代码
@@ -28,48 +20,45 @@ jobs:
           repository: GiantAxeWhy/atomic-bomb-engine-front
           path: vue-project
 
-      - name: 确保Alpine容器准备就绪
+      - name: 启动Alpine容器
         run: |
-          for i in {1..10}; do
-            echo "Checking if Docker container is ready (Attempt $i)..."
-            docker exec alpine_service_1 /bin/sh -c "echo Container is ready!" && break || sleep 1
-          done
+          docker run --name alpine-container -d -v "${{ github.workspace }}:/__w" -w "/__w" alpine:latest sleep 3600
 
-      - name: 在Docker中设置Python环境
+      - name: 设置Python环境
         run: |
-          docker exec alpine_service_1 apk add --no-cache python3-dev py3-pip build-base
-          docker exec alpine_service_1 ln -s /usr/bin/python3 /usr/bin/python
-          docker exec alpine_service_1 python -m ensurepip
-          docker exec alpine_service_1 pip install --upgrade pip setuptools wheel
+          docker exec alpine-container apk add --no-cache python3-dev py3-pip build-base
+          docker exec alpine-container ln -s /usr/bin/python3 /usr/bin/python
+          docker exec alpine-container python -m ensurepip
+          docker exec alpine-container pip install --upgrade pip setuptools wheel
 
-      - name: 在Docker中安装Node.js
+      - name: 安装Node.js
         run: |
-          docker exec alpine_service_1 apk add --no-cache nodejs npm
-          docker exec alpine_service_1 node --version
-          docker exec alpine_service_1 npm --version
+          docker exec alpine-container apk add --no-cache nodejs npm
+          docker exec alpine-container node --version
+          docker exec alpine-container npm --version
 
-      - name: 在Docker中构建前端
+      - name: 构建前端
         run: |
-          docker exec alpine_service_1 sh -c "cd vue-project && npm install && npm run build"
+          docker exec alpine-container sh -c "cd vue-project && npm install && npm run build"
 
       - name: 删除现有的dist目录
-        run: docker exec alpine_service_1 rm -rf python/atomic_bomb_engine/dist/*
+        run: docker exec alpine-container rm -rf python/atomic_bomb_engine/dist/*
 
       - name: 将dist复制到Python项目
-        run: docker exec alpine_service_1 cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
+        run: docker exec alpine-container cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
 
-      - name: 在Docker中安装Rust和maturin
+      - name: 安装Rust和maturin
         run: |
-          docker exec alpine_service_1 sh -c "apk add rust cargo && pip install maturin"
+          docker exec alpine-container sh -c "apk add rust cargo && pip install maturin"
 
-      - name: 在Docker中使用maturin构建代码
+      - name: 使用maturin构建代码
         run: |
-          docker exec alpine_service_1 sh -c "cd python/atomic_bomb_engine && maturin build --release --interpreter python"
+          docker exec alpine-container sh -c "cd python/atomic_bomb_engine && maturin build --release --interpreter python"
 
       - name: 安装Twine并上传
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          docker exec alpine_service_1 pip install twine
-          docker exec alpine_service_1 twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
+          docker exec alpine-container pip install twine
+          docker exec alpine-container twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
