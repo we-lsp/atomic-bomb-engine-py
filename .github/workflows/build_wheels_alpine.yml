@@ -27,7 +27,7 @@ jobs:
       - name: 设置Python环境
         run: |
           docker exec alpine-container apk add --no-cache python3-dev py3-pip build-base
-          docker exec alpine-container ln -s /usr/bin/python3 /usr/bin/python
+          docker exec alpine-container sh -c "[ ! -e /usr/bin/python ] && ln -s /usr/bin/python3 /usr/bin/python || echo 'Link already exists'"
           docker exec alpine-container python -m ensurepip
           docker exec alpine-container pip install --upgrade pip setuptools wheel
 
