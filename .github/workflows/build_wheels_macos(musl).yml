@@ -19,9 +19,7 @@ jobs:
 
       - name: 启动 Docker 服务
         run: |
-          # 启动 Docker 服务
-          open --background -a Docker
-          # 等待 Docker 守护程序启动
+          open --background -a /Applications/Docker.app
           until docker info >/dev/null 2>&1; do
             echo "Waiting for Docker to launch..."
             sleep 1
