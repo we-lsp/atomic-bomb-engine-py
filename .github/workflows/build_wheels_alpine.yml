@@ -43,7 +43,14 @@ jobs:
           docker exec python-alpine-container apk add rust cargo
           docker exec python-alpine-container pip install maturin
 
+      - name: 安装依赖和工具
+        run: |
+          docker exec python-alpine-container apk add --no-cache openssl-dev pkgconfig rust cargo
+          docker exec python-alpine-container pip install maturin
+
       - name: 使用 maturin 构建代码
+        env:
+          OPENSSL_DIR: /usr/lib
         run: |
           docker exec python-alpine-container sh -c "maturin build --release"
 
