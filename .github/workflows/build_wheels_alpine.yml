@@ -20,45 +20,37 @@ jobs:
           repository: GiantAxeWhy/atomic-bomb-engine-front
           path: vue-project
 
-      - name: 启动Alpine容器
+      - name: 启动 Python Alpine 容器
         run: |
-          docker run --name alpine-container -d -v "${{ github.workspace }}:/__w" -w "/__w" alpine:latest sleep 3600
+          docker run --name python-alpine-container -d -v "${{ github.workspace }}:/__w" -w "/__w" python:3.12-alpine sleep 3600
 
-      - name: 设置Python环境
+      - name: 安装Node.js和构建工具
         run: |
-          docker exec alpine-container apk add --no-cache python3-dev py3-pip build-base
-          docker exec alpine-container sh -c "[ ! -e /usr/bin/python ] && ln -s /usr/bin/python3 /usr/bin/python || echo 'Link already exists'"
-          docker exec alpine-container python -m ensurepip
-          docker exec alpine-container pip install --upgrade pip setuptools wheel
-
-      - name: 安装Node.js
-        run: |
-          docker exec alpine-container apk add --no-cache nodejs npm
-          docker exec alpine-container node --version
-          docker exec alpine-container npm --version
+          docker exec python-alpine-container apk add --no-cache nodejs npm build-base
 
       - name: 构建前端
         run: |
-          docker exec alpine-container sh -c "cd vue-project && npm install && npm run build"
+          docker exec python-alpine-container sh -c "cd vue-project && npm install && npm run build"
 
       - name: 删除现有的dist目录
-        run: docker exec alpine-container rm -rf python/atomic_bomb_engine/dist/*
+        run: docker exec python-alpine-container rm -rf python/atomic_bomb_engine/dist/*
 
       - name: 将dist复制到Python项目
-        run: docker exec alpine-container cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
+        run: docker exec python-alpine-container cp -r vue-project/dist/* python/atomic_bomb_engine/dist/
 
-      - name: 安装Rust和maturin
+      - name: 安装 Rust 和 maturin
         run: |
-          docker exec alpine-container sh -c "apk add rust cargo && pip install maturin"
+          docker exec python-alpine-container apk add rust cargo
+          docker exec python-alpine-container pip install maturin
 
-      - name: 使用maturin构建代码
+      - name: 使用 maturin 构建代码
         run: |
-          docker exec alpine-container sh -c "cd python/atomic_bomb_engine && maturin build --release --interpreter python"
+          docker exec python-alpine-container sh -c "cd python/atomic_bomb_engine && maturin build --release --interpreter python"
 
-      - name: 安装Twine并上传
+      - name: 安装 Twine 并上传
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          docker exec alpine-container pip install twine
-          docker exec alpine-container twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
+          docker exec python-alpine-container pip install twine
+          docker exec python-alpine-container twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
