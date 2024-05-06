@@ -45,7 +45,7 @@ jobs:
 
       - name: 使用 maturin 构建代码
         run: |
-          docker exec python-alpine-container sh -c "cd python/atomic_bomb_engine && maturin build --release --interpreter python"
+          docker exec python-alpine-container sh -c "maturin build --release"
 
       - name: 安装 Twine 并上传
         env:
