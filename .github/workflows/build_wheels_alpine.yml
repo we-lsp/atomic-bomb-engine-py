@@ -28,6 +28,13 @@ jobs:
           repository: GiantAxeWhy/atomic-bomb-engine-front
           path: vue-project
 
+      - name: 确保Alpine容器准备就绪
+        run: |
+          for i in {1..10}; do
+            echo "Checking if Docker container is ready (Attempt $i)..."
+            docker exec alpine-container /bin/sh -c "echo Container is ready!" && break || sleep 1
+          done
+
       - name: 在Docker中设置Python环境
         run: |
           docker exec alpine apk add --no-cache python3-dev py3-pip build-base
