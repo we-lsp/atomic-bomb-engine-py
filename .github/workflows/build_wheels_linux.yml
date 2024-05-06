@@ -21,11 +21,17 @@ jobs:
           sudo apt install -y musl-dev
           sudo apt install -y libssl-dev
 
-      - name: 配置环境变量
+      - name: 配置环境变量 (通用)
         run: |
           echo "OPENSSL_DIR=/usr/include/openssl" >> $GITHUB_ENV
-          echo "OPENSSL_LIB_DIR=/usr/lib/openssl" >> $GITHUB_ENV
-          echo "OPENSSL_INCLUDE_DIR=/usr/include/openssl" >> $GITHUB_ENV
+          echo "OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+          echo "OPENSSL_INCLUDE_DIR=/usr/include" >> $GITHUB_ENV
+
+      - name: 特定配置环境变量 (musl)
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: |
+          echo "OPENSSL_LIB_DIR=/path/to/musl/openssl/lib" >> $GITHUB_ENV
+          echo "OPENSSL_INCLUDE_DIR=/path/to/musl/openssl/include" >> $GITHUB_ENV
 
       - name: 签出rust代码
         uses: actions/checkout@v2
