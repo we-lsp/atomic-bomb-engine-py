@@ -12,34 +12,11 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+          - target: "x86_64-unknown-linux-musl"
 
     steps:
-      - name: 安装 musl-tools 和 OpenSSL (musl 版本)
-        run: |
-          sudo apt update
-          sudo apt install -y musl-tools
-          sudo apt install -y musl-dev
-          sudo apt install -y libssl-dev
-
-      - name: 查找 OpenSSL 头文件和库文件
-        run: |
-          echo "查找 opensslconf.h 文件..."
-          find /usr -name opensslconf.h
-          echo "查找 libssl 库文件..."
-          find /usr -name libssl.so
-
-      - name: 配置环境变量 (通用)
-        run: |
-          echo "OPENSSL_DIR=/usr" >> $GITHUB_ENV
-          echo "OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
-          echo "OPENSSL_INCLUDE_DIR=/usr/include/x86_64-linux-gnu/openssl" >> $GITHUB_ENV
-
-      - name: 特定配置环境变量 (musl)
-        if: matrix.target == 'x86_64-unknown-linux-musl'
-        run: |
-          echo "OPENSSL_LIB_DIR=/path/to/musl/openssl/lib" >> $GITHUB_ENV
-          echo "OPENSSL_INCLUDE_DIR=/path/to/musl/openssl/include" >> $GITHUB_ENV
-
       - name: 签出rust代码
         uses: actions/checkout@v2
 
@@ -81,14 +58,34 @@ jobs:
       - name: 添加musl target
         run: rustup target add x86_64-unknown-linux-musl
 
+      - name: 安装 musl-tools 和 OpenSSL
+        run: |
+          sudo apt update
+          sudo apt install -y musl-tools
+          sudo apt install -y musl-dev
+          sudo apt install -y libssl-dev
+
+      - name: 配置环境变量
+        run: |
+          if [ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]; then
+            echo "OPENSSL_DIR=/usr" >> $GITHUB_ENV
+            echo "OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+            echo "OPENSSL_INCLUDE_DIR=/usr/include/x86_64-linux-gnu/openssl" >> $GITHUB_ENV
+          else
+            echo "OPENSSL_LIB_DIR=/usr/local/musl/lib" >> $GITHUB_ENV
+            echo "OPENSSL_INCLUDE_DIR=/usr/local/musl/include" >> $GITHUB_ENV
+          fi
+
       - name: 安装maturin
         run: pip install maturin
 
-      - name: 构建glibc wheels
-        run: maturin build --release --interpreter python${{ matrix.python-version }}
-
-      - name: 构建musl wheels
-        run: maturin build --release --target x86_64-unknown-linux-musl --interpreter python${{ matrix.python-version }}
+      - name: 构建wheels
+        run: |
+          if [ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]; then
+            maturin build --release --interpreter python${{ matrix.python-version }}
+          else
+            maturin build --release --target x86_64-unknown-linux-musl --interpreter python${{ matrix.python-version }}
+          fi
 
       - name: 安装Twine
         run: pip install twine
