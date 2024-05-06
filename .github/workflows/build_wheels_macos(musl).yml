@@ -13,6 +13,13 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
     steps:
+      - name: 安装 Docker
+        run: |
+          brew install --cask docker
+          open /Applications/Docker.app
+          # 等待 Docker 启动
+          until docker system info > /dev/null 2>&1; do sleep 1; done
+
       - name: 签出代码
         uses: actions/checkout@v2
 
