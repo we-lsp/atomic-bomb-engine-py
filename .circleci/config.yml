@@ -8,12 +8,13 @@ workflows:
           filters:
             branches:
               only:
-                - release
+                - circleci-project-setup
 
 jobs:
   build-wheels:
     macos:
-      xcode: "11.3.0"
+      xcode: "13.0.0"
+    resource_class: macos.medium
     steps:
       - checkout
 
