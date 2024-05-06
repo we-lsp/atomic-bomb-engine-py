@@ -1,0 +1,76 @@
+version: 2.1
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build-wheels:
+          filters:
+            branches:
+              only:
+                - release
+
+jobs:
+  build-wheels:
+    macos:
+      xcode: "11.3.0"
+    steps:
+      - checkout
+
+      - run:
+          name: Checkout frontend
+          command: |
+            git clone https://github.com/GiantAxeWhy/atomic-bomb-engine-front vue-project
+
+      - run:
+          name: Start Alpine container
+          command: |
+            docker run --name python-alpine-container -d -v "${PWD}:/__w" -w "/__w" alpine:latest sleep 3600
+
+      - run:
+          name: Install Node.js and build tools
+          command: |
+            docker exec python-alpine-container apk add --no-cache nodejs npm build-base
+
+      - run:
+          name: Build frontend
+          command: |
+            docker exec python-alpine-container sh -c "cd vue-project && npm install && npm run build"
+
+      - run:
+          name: Install pyenv and specific Python versions
+          command: |
+            docker exec python-alpine-container apk add --no-cache bash git curl openssl-dev bzip2-dev zlib-dev readline-dev sqlite-dev
+            docker exec python-alpine-container sh -c "curl https://pyenv.run | bash"
+            docker exec python-alpine-container sh -c 'export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)" && for version in $(echo 3.8 3.9 3.10 3.11 3.12); do pyenv install $version; pyenv global $version; curl https://bootstrap.pypa.io/get-pip.py | python; done'
+
+      - run:
+          name: Install Rust, maturin, and patchelf
+          command: |
+            docker exec python-alpine-container apk add --no-cache rust cargo patchelf
+            docker exec python-alpine-container sh -c 'export PATH="/root/.pyenv/shims:$PATH" && pip install maturin'
+
+      - run:
+          name: Build wheels using maturin
+          command: |
+            docker exec python-alpine-container sh -c '
+              export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)"
+              for version in $(echo 3.8 3.9 3.10 3.11 3.12); do
+                pyenv global $version
+                maturin build --release
+              done'
+
+      - run:
+          name: Copy wheels to Runner
+          command: docker cp python-alpine-container:/__w/target/wheels ./
+
+      - run:
+          name: Install Twine
+          command: pip install twine
+
+      - run:
+          name: Upload wheels to PyPI
+          command: twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ wheels/*.whl
+          environment:
+            TWINE_USERNAME: __token__
+            TWINE_PASSWORD: $PYPI_PASSWORD
