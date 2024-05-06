@@ -58,6 +58,7 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_NON_INTERACTIVE: 1
         run: |
           docker exec python-alpine-container pip install twine
           docker exec python-alpine-container twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ target/wheels/*.whl
