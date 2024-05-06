@@ -16,9 +16,16 @@ jobs:
       - name: 安装 Docker
         run: |
           brew install --cask docker
-          open /Applications/Docker.app
-          # 等待 Docker 启动
-          until docker system info > /dev/null 2>&1; do sleep 1; done
+
+      - name: 启动 Docker 服务
+        run: |
+          # 启动 Docker 服务
+          open --background -a Docker
+          # 等待 Docker 守护程序启动
+          until docker info >/dev/null 2>&1; do
+            echo "Waiting for Docker to launch..."
+            sleep 1
+          done
 
       - name: 签出代码
         uses: actions/checkout@v2
