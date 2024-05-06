@@ -39,12 +39,12 @@ jobs:
         run: |
           docker exec python-alpine-container apk add --no-cache bash git curl openssl-dev bzip2-dev zlib-dev readline-dev sqlite-dev
           docker exec python-alpine-container sh -c "curl https://pyenv.run | bash"
-          docker exec python-alpine-container sh -c 'export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)" && for version in ${{ join(matrix.python-version, ' ') }}; do pyenv install $version; done'
+          docker exec python-alpine-container sh -c 'export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)" && for version in ${{ join(matrix.python-version, ' ') }}; do pyenv install $version; pyenv global $version; curl https://bootstrap.pypa.io/get-pip.py | python; done'
 
       - name: 安装 Rust、maturin 和 patchelf
         run: |
           docker exec python-alpine-container apk add --no-cache rust cargo patchelf
-          docker exec python-alpine-container pip install maturin
+          docker exec python-alpine-container sh -c 'export PATH="/root/.pyenv/shims:$PATH" && pip install maturin'
 
       - name: 使用 maturin 构建 wheels
         run: |
