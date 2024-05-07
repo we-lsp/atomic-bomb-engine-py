@@ -8,6 +8,7 @@ url,
 method,
 json=None,
 form_data=None,
+multipart_options=None,
 headers=None,
 cookies=None,
 jsonpath_extract=None,
@@ -19,6 +20,7 @@ pub(crate) fn setup_option(
     method: String,
     json: Option<PyObject>,
     form_data: Option<PyObject>,
+    multipart_options: Option<&PyList>,
     headers: Option<PyObject>,
     cookies: Option<String>,
     jsonpath_extract: Option<&PyList>,
@@ -32,6 +34,9 @@ pub(crate) fn setup_option(
     };
     if let Some(form_data) = form_data {
         dict.set_item("form_data", form_data)?;
+    };
+    if let Some(multipart_options) = multipart_options {
+        dict.set_item("multipart_options", multipart_options)?;
     };
     if let Some(headers) = headers {
         dict.set_item("headers", headers)?;

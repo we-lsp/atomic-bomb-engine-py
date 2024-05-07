@@ -410,6 +410,30 @@ atomic_bomb_engine.endpoint(
 - 优化并发逻辑
 - 前端更改为web worker发送心跳
 
+## [0.38.0] - 2024-05-7
+### Added
+- 增加附件上传功能
+  - 在初始化和每个接口中增加了multipart_options参数用于附件上传
+  - 增加multipart_option方法封装附件参数
+    - form_key: form表单的key
+    - path: 附件路径
+    - file_name: 附件名
+    - mime: 附件类型 (类型可以参考[这里](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types))
+```python
+api_endpoints=[
+            atomic_bomb_engine.endpoint(
+                name="test-file",
+                url="http://127.0.0.1:8888/upload",
+                method="post",
+                weight=100,
+                multipart_options=[atomic_bomb_engine.multipart_option(form_key="file", path="./ui.py", file_name="ui.py", mime="text/plain")],
+                assert_options=[
+                    atomic_bomb_engine.assert_option(jsonpath="$.message", reference_object="File uploaded successfully!"),
+                ],
+                think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
+            ),]
+```
+
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
 - 如果有需求也可以在Issues中讨论
@@ -421,7 +445,7 @@ atomic_bomb_engine.endpoint(
 - [x] 每个接口可以配置思考时间 ✅
 - [x] 增加form支持 ✅
 - [ ] 增加代理支持
-- [ ] 增加附件支持
+- [x] 增加附件支持 ✅
 - [ ] 断言支持不等于等更多表达方式
 
 ## 联系方式

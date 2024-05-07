@@ -193,6 +193,29 @@ pub fn new(py: Python, api_endpoints: &PyList) -> PyResult<Vec<models::api_endpo
             };
             let setup_options = utils::parse_setup_options::new(py, setup_options_pylist)?;
 
+            let multipart_options_pylist: Option<&PyList> =
+                match dict.get_item("multipart_options") {
+                    Ok(opts) => match opts {
+                        None => None,
+                        Some(py_any) => match py_any.extract::<&PyList>() {
+                            Ok(py_list) => Some(py_list),
+                            Err(e) => {
+                                return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
+                                    format!("Error: {:?}", e),
+                                ))
+                            }
+                        },
+                    },
+                    Err(e) => {
+                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
+                            "Error: {:?}",
+                            e
+                        )))
+                    }
+                };
+            let multipart_options =
+                utils::parse_multipart_options::new(py, multipart_options_pylist)?;
+
             endpoints.push(models::api_endpoint::ApiEndpoint {
                 name,
                 url,
@@ -200,6 +223,7 @@ pub fn new(py: Python, api_endpoints: &PyList) -> PyResult<Vec<models::api_endpo
                 weight,
                 json,
                 form_data,
+                multipart_options,
                 headers,
                 cookies,
                 assert_options,

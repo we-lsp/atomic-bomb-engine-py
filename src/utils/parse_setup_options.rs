@@ -1,9 +1,10 @@
+use std::collections::HashMap;
+
 use atomic_bomb_engine::models;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use serde_json::Value;
 use serde_pyobject::from_pyobject;
-use std::collections::HashMap;
 
 pub fn new(
     py: Python,
@@ -137,12 +138,42 @@ pub fn new(
                         }
                     };
 
+                    let multipart_options: Option<Vec<models::multipart_option::MultipartOption>> =
+                        match dict.get_item("multipart_options") {
+                            Ok(op_py_any) => match op_py_any {
+                                None => None,
+                                Some(py_any) => {
+                                    let pyobj = py_any.to_object(py);
+                                    match from_pyobject(pyobj.as_ref(py)) {
+                                        Ok(val) => val,
+                                        Err(e) => {
+                                            return Err(PyErr::new::<
+                                                pyo3::exceptions::PyRuntimeError,
+                                                _,
+                                            >(
+                                                format!(
+                                                "Error: {:?}",
+                                                e
+                                            )
+                                            ))
+                                        }
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
+                                    format!("Error: {:?}", e),
+                                ))
+                            }
+                        };
+
                     setup_options.push(models::setup::SetupApiEndpoint {
                         name,
                         url,
                         method,
                         json,
                         form_data,
+                        multipart_options,
                         headers,
                         cookies,
                         jsonpath_extract,
