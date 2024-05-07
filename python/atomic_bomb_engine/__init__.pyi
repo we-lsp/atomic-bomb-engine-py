@@ -32,6 +32,7 @@ def endpoint(
          weight: int,
          json: Dict | None = None,
          form_data: Dict | None = None,
+         multipart_options: List[Dict]| None = None,
          headers: Dict | None = None,
          cookies: str | None = None,
          assert_options: List | None = None,
@@ -48,6 +49,7 @@ def endpoint(
     :param weight 权重
     :param json: 请求json
     :param form_data: 请求form表单
+    :multipart_options: 附件
     :param headers: 请求头
     :param cookies: cookie
     :param assert_options: 断言参数
@@ -79,6 +81,7 @@ def setup_option(
         method: str,
         json: Dict| None = None,
         form_data: Dict| None = None,
+        multipart_options: List[Dict]| None = None,
         headers: Dict| None = None,
         cookies: str | None = None,
         jsonpath_extract: List| None = None) ->Dict[str, Any]:
@@ -89,6 +92,7 @@ def setup_option(
     :param method: 请求方法
     :param json: 请求json
     :param form_data: 请求form表单
+    :multipart_options: 附件
     :param headers: 请求头
     :param cookies: cookie
     :param jsonpath_extract: 通过jsonpath提取参数
@@ -127,4 +131,17 @@ async def batch_async(
         :param assert_channel_buffer_size: 断言队列buffer大小
         :param timeout_secs: http超时时间
         :param cookie_store_enable: 是否为客户端启用持久性cookie存储。
+    """
+
+def multipart_option(
+        form_key: str,
+        path: str,
+        file_name: str,
+        mime: str) -> Dict:
+    """
+    上传附件选项
+    :param form_key: form表单的key，根据服务端选择，e.g: file， file1
+    :param path: 文件路径
+    :param file_name: 文件名
+    :param mime: 文件类型，e.g: application/octet-stream,可以参考:https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
     """
