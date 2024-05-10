@@ -5,12 +5,11 @@ use futures::StreamExt;
 use crate::utils;
 use pyo3::types::{PyDict, PyList};
 use pyo3::{pyclass, pymethods, PyObject, PyRefMut, PyResult, Python, ToPyObject};
-use tokio::runtime::Runtime;
 use tokio::sync::Mutex;
 
 #[pyclass]
 pub(crate) struct BatchRunner {
-    runtime: Runtime,
+    runtime: tokio::runtime::Runtime,
     stream: Arc<Mutex<Option<BoxStream<'static, Result<Option<BatchResult>, anyhow::Error>>>>>,
 }
 
@@ -19,7 +18,7 @@ impl BatchRunner {
     #[new]
     fn new() -> Self {
         BatchRunner {
-            runtime: Runtime::new().unwrap(),
+            runtime: tokio::runtime::Runtime::new().unwrap(),
             stream: Arc::new(Mutex::new(None)),
         }
     }
@@ -74,7 +73,6 @@ impl BatchRunner {
             Ok::<(), pyo3::PyErr>(())
         };
 
-        // 使用Tokio兼容的future_into_py
         Python::with_gil(|py| {
             pyo3_asyncio::tokio::future_into_py(py, fut)
                 .map(|py_any| py_any.to_object(py)) // Convert &PyAny to Py<PyAny>
@@ -144,7 +142,8 @@ impl BatchRunner {
                 None => Ok(None),
             }
         } else {
-            Err(pyo3::exceptions::PyRuntimeError::new_err("Stream not initialized"))
+            eprintln!("stream未初始化，请等待");
+            Ok(None)
         }
     }
 }
