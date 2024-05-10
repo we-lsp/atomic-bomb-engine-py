@@ -4,7 +4,7 @@ use futures::stream::BoxStream;
 use futures::StreamExt;
 use crate::utils;
 use pyo3::types::{PyDict, PyList};
-use pyo3::{pyclass, pymethods, PyObject, PyRefMut, PyResult, Python, ToPyObject};
+use pyo3::{ pyclass, pymethods, PyObject, PyRefMut, PyResult, Python, ToPyObject};
 use tokio::sync::Mutex;
 
 #[pyclass]
@@ -143,7 +143,9 @@ impl BatchRunner {
             }
         } else {
             eprintln!("stream未初始化，请等待");
-            Ok(None)
+            let dict = PyDict::new(py);
+            dict.set_item("should_wait", true)?;
+            Ok(Some(dict.to_object(py)))
         }
     }
 }
