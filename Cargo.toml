@@ -1,6 +1,6 @@
 [package]
 name = "atomic-bomb-engine-py"
-version = "0.38.0"
+version = "0.39.0"
 edition = "2021"
 
 [lib]
@@ -10,20 +10,25 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-atomic-bomb-engine = "0.38.0"
-# atomic-bomb-engine = { git = "https://github.com/we-lsp/atomic-bomb-engine.git", branch = "source"}
+atomic-bomb-engine = "0.39.0"
+# atomic-bomb-engine = { git = "https://github.com/we-lsp/atomic-bomb-engine.git", branch = "rps-window"}
 tokio = "1.36.0"
-pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime"] }
+pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime", "async-std"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = [] }
 serde-pyobject = "0.2.1"
+async-std = "1.12.0"
+async-stream = "0.3.5"
+futures = "0.3.30"
+tokio-stream = "0.1.15"
+anyhow = "1.0.83"
 
 [build]
 rustflags = ["-C", "target-feature=+crt-static"]
 
 [dependencies.pyo3]
 version = "0.20.3"
-features = ["extension-module"]
+features = ["extension-module", "auto-initialize"]
 
 [tool.maturin]
 name = "atomic_bomb_engine"

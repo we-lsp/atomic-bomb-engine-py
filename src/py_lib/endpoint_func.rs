@@ -42,7 +42,7 @@ pub(crate) fn endpoint(
     if let Some(form_data) = form_data {
         dict.set_item("form_data", form_data)?;
     };
-    if let Some(multipart_options) = multipart_options{
+    if let Some(multipart_options) = multipart_options {
         dict.set_item("multipart_options", multipart_options)?;
     };
     if let Some(headers) = headers {
