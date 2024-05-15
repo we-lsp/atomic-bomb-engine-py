@@ -35,34 +35,41 @@ import asyncio
 
   - 多接口压测
 
-多接口压测可以使用batch_async方法进行操作，函数签名和解释如下
- ```python
-async def batch_async(
-        test_duration_secs: int,
-        concurrent_requests: int,
-        api_endpoints:List[Dict],
-        step_option:Dict[str, int]|None=None,
-        setup_options:List[Dict[str, Any]]|None=None,
-        verbose:bool=False,
-        should_prevent:bool=False,
-        assert_channel_buffer_size:int=1024,
-        timeout_secs=0,
-        cookie_store_enable=True
-) ->Dict:
-  """
-      批量压测
-      :param test_duration_secs: 测试持续时间
-      :param concurrent_requests: 并发数
-      :param api_endpoints: 接口信息
-      :param step_option: 阶梯加压选项
-      :param setup_options: 初始化选项
-      :param verbose: 打印详细信息
-      :param should_prevent: 是否禁用睡眠
-      :param assert_channel_buffer_size: 断言队列buffer大小
-      :param timeout_secs: http超时时间
-      :param cookie_store_enable: 是否为客户端启用持久性cookie存储。
-  """
- ```
+多接口压测可以先使用
+```python 
+runner = atomic_bomb_engine.BatchRunner()
+```
+实例化一个runner类
+通过runner类中的run方法开启压测
+run方法函数签名如下
+```python
+def run(
+         self,
+         test_duration_secs: int,
+         concurrent_requests: int,
+         api_endpoints:List[Dict],
+         step_option:Dict[str, int]|None=None,
+         setup_options:List[Dict[str, Any]]|None=None,
+         verbose:bool=False,
+         should_prevent:bool=False,
+         assert_channel_buffer_size:int=1024,
+         timeout_secs=0,
+         cookie_store_enable=True
+    ) -> None:
+        """
+            批量压测
+            :param test_duration_secs: 测试持续时间
+            :param concurrent_requests: 并发数
+            :param api_endpoints: 接口信息
+            :param step_option: 阶梯加压选项
+            :param setup_options: 初始化选项
+            :param verbose: 打印详细信息
+            :param should_prevent: 是否禁用睡眠
+            :param assert_channel_buffer_size: 断言队列buffer大小
+            :param timeout_secs: http超时时间
+            :param cookie_store_enable: 是否为客户端启用持久性cookie存储。
+        """
+```
 
 使用assert_option方法可以返回断言选项字典
 ```python
@@ -147,27 +154,48 @@ async def run_batch():
   return result
  ```
     
-监听时可以使用BatchListenIter生成器
-```python
-async def listen_batch():
-    iterator = atomic_bomb_engine.BatchListenIter()
-    for message in iterator:
-        if message:
-            print(message)
-        else:
-            await asyncio.sleep(0.3)
-```
+监听时可以在使用完run方法后，继续迭代runner即可
+
 压测+同时监听
+
 ```python 
+import asyncio
+
+
+async def batch_async():
+  runner = atomic_bomb_engine.BatchRunner()
+  runner.run(
+    test_duration_secs=30,
+    concurrent_requests=30,
+    step_option=atomic_bomb_engine.step_option(increase_step=3, increase_interval=3),
+    timeout_secs=15,
+    cookie_store_enable=True,
+    verbose=False,
+    api_endpoints=[
+      atomic_bomb_engine.endpoint(
+        name="test-1",
+        url="http://127.0.0.1:8080/direct",
+        method="POST",
+        json={"name": "test-1", "number": 1},
+        weight=100,
+        assert_options=[
+          atomic_bomb_engine.assert_option(jsonpath="$.msg", reference_object="操作成功"),
+        ],
+      ),
+    ])
+  return runner
+
+
 async def main():
-    await asyncio.gather(
-        run_batch(),
-        listen_batch(),
-    )
+  results = await batch_async()
+  for res in results:
+    if res.get("should_wait"):
+      await asyncio.sleep(0.1)
+    print(res)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+if __name__ == '__main__':
+  asyncio.run(main())
 ```
 
 # 压测时使用ui界面监控
@@ -186,70 +214,70 @@ from atomic_bomb_engine import server
 
 
 @server.ui(port=8000)
-async def run_batch():
-  result = await atomic_bomb_engine.batch_async(
-    # 测试持续时间
-    test_duration_secs=60,
-    # 并发量
-    concurrent_requests=200,
-    # 阶梯设置（每5秒增加30个并发）
-    step_option=atomic_bomb_engine.step_option(increase_step=30, increase_interval=5),
-    # 接口超时时间
-    timeout_secs=10,
-    # 是否开启客户端启用持久性cookie存储
-    cookie_store_enable=True,
-    # 全局初始化
-    setup_options=[
-      atomic_bomb_engine.setup_option(
-        name="初始化-1",
-        url="http://localhost:8080/setup",
-        method="get",
-        jsonpath_extract=[
-          atomic_bomb_engine.jsonpath_extract_option(key="test-msg", jsonpath="$.msg"),
-          atomic_bomb_engine.jsonpath_extract_option(key="test-code", jsonpath="$.code"),
-        ]
-      )],
-    # 是否开启详细日志
-    verbose=False,
-    # 被压接口设置
-    api_endpoints=[
-      atomic_bomb_engine.endpoint(
-        # 接口任务命名
-        name="test-1",
-        # 针对每个接口初始化
-        setup_options=[
-          atomic_bomb_engine.setup_option(
-            name="api-初始化-1",
-            url="http://localhost:8080/api_setup",
-            method="get",
-            jsonpath_extract=[
-              atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-1", jsonpath="$.msg"),
-              atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-1", jsonpath="$.code"),
-            ]
-          )
-        ],
-        # 被压接口url
-        url="http://localhost:8080/direct",
-        # 请求方式
-        method="POST",
-        # 权重
-        weight=1,
-        # 发送json请求
-        json={"name": "{{api-test-msg-1}}", "number": 1},
-        # 断言选项
-        assert_options=[
-          atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
-        ],
-        # 思考时间选项（在最大和最小之间随机，单位毫秒）
-        think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
-      ),
-    ])
-  print(result)
-  return result
+async def batch_async():
+    runner = atomic_bomb_engine.BatchRunner()
+    runner.run(
+      # 测试持续时间
+      test_duration_secs=60,
+      # 并发量
+      concurrent_requests=200,
+      # 阶梯设置（每5秒增加30个并发）
+      step_option=atomic_bomb_engine.step_option(increase_step=30, increase_interval=5),
+      # 接口超时时间
+      timeout_secs=10,
+      # 是否开启客户端启用持久性cookie存储
+      cookie_store_enable=True,
+      # 全局初始化
+      setup_options=[
+        atomic_bomb_engine.setup_option(
+          name="初始化-1",
+          url="http://localhost:8080/setup",
+          method="get",
+          jsonpath_extract=[
+            atomic_bomb_engine.jsonpath_extract_option(key="test-msg", jsonpath="$.msg"),
+            atomic_bomb_engine.jsonpath_extract_option(key="test-code", jsonpath="$.code"),
+          ]
+        )],
+      # 是否开启详细日志
+      verbose=False,
+      # 被压接口设置
+      api_endpoints=[
+        atomic_bomb_engine.endpoint(
+          # 接口任务命名
+          name="test-1",
+          # 针对每个接口初始化
+          setup_options=[
+            atomic_bomb_engine.setup_option(
+              name="api-初始化-1",
+              url="http://localhost:8080/api_setup",
+              method="get",
+              jsonpath_extract=[
+                atomic_bomb_engine.jsonpath_extract_option(key="api-test-msg-1", jsonpath="$.msg"),
+                atomic_bomb_engine.jsonpath_extract_option(key="api-test-code-1", jsonpath="$.code"),
+              ]
+            )
+          ],
+          # 被压接口url
+          url="http://localhost:8080/direct",
+          # 请求方式
+          method="POST",
+          # 权重
+          weight=1,
+          # 发送json请求
+          json={"name": "{{api-test-msg-1}}", "number": 1},
+          # 断言选项
+          assert_options=[
+            atomic_bomb_engine.assert_option(jsonpath="$.number", reference_object=1),
+          ],
+          # 思考时间选项（在最大和最小之间随机，单位毫秒）
+          think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
+        ),
+      ])
+    return runner
 
 
 if __name__ == '__main__':
-    asyncio.run(run_batch())
+    asyncio.run(batch_async())
 ```
 
 使用server.ui装饰器，可以给批量压测方法启动一个简单的web服务器，不需要再手动监听BatchListenIter生成器
@@ -433,6 +461,12 @@ api_endpoints=[
                 think_time_option=atomic_bomb_engine.think_time_option(min_millis=500, max_millis=1200),
             ),]
 ```
+
+## [0.39.0] - 2024-05-15
+### Added
+- 启用BatchRunner类，每次执行可以返回一个迭代器
+- 废除run_batch方法
+- 废除ResultsIter迭代器
 
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈

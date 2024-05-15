@@ -68,6 +68,9 @@ def ui(port: int = 8000, auto_open: bool = True):
     # ws连接池
     connections: Dict[str, WsConn] = dict()
 
+    # 结果迭代器
+    res_iter = None
+
     def decorator(func):
         async def start_service(*args, **kwargs):
             # 建表
@@ -98,10 +101,16 @@ def ui(port: int = 8000, auto_open: bool = True):
                             break
 
                 async def push_result():
-                    result_iter = atomic_bomb_engine.BatchListenIter()
-                    for item in result_iter:
+                    nonlocal res_iter
+
+                    while res_iter is None:
+                        await asyncio.sleep(0.1)
+
+                    for item in res_iter:
                         if item:
+                            # 插入数据
                             await insert_result_data(item)
+                            # 推送result
                             for cid, conn in list(connections.items()):
                                 try:
                                     await conn.ws.send_json(item)
@@ -111,7 +120,16 @@ def ui(port: int = 8000, auto_open: bool = True):
                                     # 从连接池中移除断开的连接
                                     connections.pop(cid, None)
                                     return
-                        await asyncio.sleep(0.5)
+
+                    for cid, conn in list(connections.items()):
+                        try:
+                            await conn.ws.send_str("DONE")
+                        except ConnectionResetError:
+                            sys.stderr.write(f'{time.ctime()}-WebSocket ID {cid} 断开, 无法推送\n')
+                            sys.stderr.flush()
+                            # 从连接池中移除断开的连接
+                            connections.pop(cid, None)
+                            return
 
                 # 推送任务
                 push_task = asyncio.create_task(push_result())
@@ -137,33 +155,13 @@ def ui(port: int = 8000, auto_open: bool = True):
                 connections.pop(client_id, None)
                 return ws
 
-            # 异步任务回调
-            def task_done_callback(task):
-                # 获取任务结果
-                result = task.result()
-                asyncio.create_task(push_done_callback(result))
-
-            # 推送成功结果
-            async def push_done_callback(result):
-                await insert_result_data(result)
-                for cid, conn in list(connections.items()):
-                    try:
-                        await conn.ws.send_json(result)
-                        await conn.ws.send_str("DONE")
-                    except ConnectionResetError:
-                        sys.stderr.write(f'{time.ctime()}-WebSocket ID {cid} 断开, 无法推送\n')
-                        sys.stderr.flush()
-                        # 从连接池中移除断开的连接
-                        connections.pop(cid, None)
-                        return
-
             # 定义run接口
             async def run_decorated_function(request):
                 if await running.is_running():
                     return web.json_response({"message": "任务正在运行中", "success": False})
                 await running.set_running()
-                task = asyncio.create_task(func(*args, **kwargs))
-                task.add_done_callback(task_done_callback)
+                nonlocal res_iter
+                res_iter = await func(*args, **kwargs)
                 return web.json_response({"message": "压测任务已启动", "success": True})
 
             # 定义history接口

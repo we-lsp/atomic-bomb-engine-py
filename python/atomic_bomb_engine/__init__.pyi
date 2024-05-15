@@ -101,31 +101,6 @@ def multipart_option(
     :param mime: 文件类型，e.g: application/octet-stream,可以参考:https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
     """
 
-# async def batch_async(
-#              test_duration_secs: int,
-#              concurrent_requests: int,
-#              api_endpoints:List[Dict],
-#              step_option:Dict[str, int]|None=None,
-#              setup_options:List[Dict[str, Any]]|None=None,
-#              verbose:bool=False,
-#              should_prevent:bool=False,
-#              assert_channel_buffer_size:int=1024,
-#              timeout_secs=0,
-#              cookie_store_enable=True
-# ) ->Dict:
-#     """
-#         批量压测
-#         :param test_duration_secs: 测试持续时间
-#         :param concurrent_requests: 并发数
-#         :param api_endpoints: 接口信息
-#         :param step_option: 阶梯加压选项
-#         :param setup_options: 初始化选项
-#         :param verbose: 打印详细信息
-#         :param should_prevent: 是否禁用睡眠
-#         :param assert_channel_buffer_size: 断言队列buffer大小
-#         :param timeout_secs: http超时时间
-#         :param cookie_store_enable: 是否为客户端启用持久性cookie存储。
-#     """
 class BatchRunner:
     def __init__(self) -> None:
         ...

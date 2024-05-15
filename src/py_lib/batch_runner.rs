@@ -93,8 +93,8 @@ impl BatchRunner {
         match stream_guard.as_mut() {
             Some(stream) => {
                 let next_stream = slf.runtime.block_on(async {
-                    let n = stream.next().await;
-                    n
+                    let batch_result = stream.next().await;
+                    batch_result
                 });
 
                 match next_stream {
