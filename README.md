@@ -468,6 +468,10 @@ api_endpoints=[
 - 废除run_batch方法
 - 废除ResultsIter迭代器
 
+## [0.40.0] - 2024-05-16
+### Added
+- 将rps统计改为滑动窗口的形式
+
 ## bug和需求
 - 如果发现了bug，把复现步骤一起写到Issus中哈
 - 如果有需求也可以在Issues中讨论
