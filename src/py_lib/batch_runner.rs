@@ -11,6 +11,7 @@ use tokio::sync::Mutex;
 pub(crate) struct BatchRunner {
     runtime: tokio::runtime::Runtime,
     stream: Arc<Mutex<Option<BoxStream<'static, Result<Option<BatchResult>, anyhow::Error>>>>>,
+    is_done: Arc<Mutex<bool>>,
 }
 
 #[pymethods]
@@ -20,6 +21,7 @@ impl BatchRunner {
         BatchRunner {
             runtime: tokio::runtime::Runtime::new().unwrap(),
             stream: Arc::new(Mutex::new(None)),
+            is_done: Arc::new(Mutex::new(false)),
         }
     }
 
@@ -85,10 +87,21 @@ impl BatchRunner {
     }
 
     fn __next__(slf: PyRefMut<'_, Self>, py: Python) -> PyResult<Option<PyObject>> {
+        let is_done_clone = slf.is_done.clone();
+
         let mut stream_guard = slf.runtime.block_on(async {
             let stream = slf.stream.lock().await;
             stream
         });
+
+        let is_done = slf.runtime.block_on(async {
+            let done = is_done_clone.lock().await;
+            *done
+        });
+
+        if is_done {
+            return Ok(None);
+        }
 
         match stream_guard.as_mut() {
             Some(stream) => {
@@ -99,6 +112,15 @@ impl BatchRunner {
 
                 match next_stream {
                     Some(Ok(result)) => {
+
+                        if result.is_none() {
+                            let done = slf.is_done.clone();
+                            slf.runtime.block_on(async {
+                                let mut done_lock = done.lock().await;
+                                *done_lock = true;
+                            });
+                        }
+
                         let dict = PyDict::new(py);
                         if let Some(test_result) = result {
                             dict.set_item("total_duration", test_result.total_duration)?;
@@ -148,7 +170,14 @@ impl BatchRunner {
                         Ok(Some(dict.to_object(py)))
                     }
                     Some(Err(e)) => Err(pyo3::exceptions::PyRuntimeError::new_err(e.to_string())),
-                    None => Ok(None),
+                    None => {
+                        let done = slf.is_done.clone();
+                        slf.runtime.block_on(async {
+                            let mut done_lock = done.lock().await;
+                            *done_lock = true;
+                        });
+                        Ok(None)
+                    },
                 }
             }
             None => {
