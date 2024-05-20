@@ -36,6 +36,7 @@ impl BatchRunner {
     assert_channel_buffer_size=1024,
     timeout_secs=0,
     cookie_store_enable=true,
+    ema_alpha=0f64,
     ))]
     fn run(
         &self,
@@ -50,6 +51,7 @@ impl BatchRunner {
         assert_channel_buffer_size: usize,
         timeout_secs: u64,
         cookie_store_enable: bool,
+        ema_alpha: f64,
     ) -> PyResult<PyObject> {
         let stream_clone = self.stream.clone();
         let endpoints = utils::parse_api_endpoints::new(py, api_endpoints)
@@ -71,6 +73,7 @@ impl BatchRunner {
                 step_opt,
                 setup_opts,
                 assert_channel_buffer_size,
+                ema_alpha,
             )
             .await;
             *stream_clone.lock().await = Some(stream);

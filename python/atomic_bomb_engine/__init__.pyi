@@ -116,7 +116,8 @@ class BatchRunner:
              should_prevent:bool=False,
              assert_channel_buffer_size:int=1024,
              timeout_secs=0,
-             cookie_store_enable=True
+             cookie_store_enable=True,
+             ema_alpha: float=0,
     ) -> None:
         """
             批量压测
@@ -130,6 +131,7 @@ class BatchRunner:
             :param assert_channel_buffer_size: 断言队列buffer大小
             :param timeout_secs: http超时时间
             :param cookie_store_enable: 是否为客户端启用持久性cookie存储。
+            :param ema_alpha: 指数滑动平均参数，0-1之间,0为不使用，值越大曲线越平滑，但是越失真，建议使用0.1以下
         """
         ...
 
