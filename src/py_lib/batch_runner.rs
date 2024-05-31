@@ -115,7 +115,6 @@ impl BatchRunner {
 
                 match next_stream {
                     Some(Ok(result)) => {
-
                         if result.is_none() {
                             let done = slf.is_done.clone();
                             slf.runtime.block_on(async {
@@ -180,7 +179,7 @@ impl BatchRunner {
                             *done_lock = true;
                         });
                         Ok(None)
-                    },
+                    }
                 }
             }
             None => {
