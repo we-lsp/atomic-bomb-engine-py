@@ -24,21 +24,14 @@ jobs:
           repository: GiantAxeWhy/atomic-bomb-engine-front
           path: vue-project
 
-      - name: 启动 CentOS 8 容器
+      - name: 启动 AlmaLinux 容器
         run: |
-          docker run --name python-centos-container -d -v "${{ github.workspace }}:/workspace" -w "/workspace" centos:8 sleep 3600
-
-      - name: 替换 CentOS 镜像源为 Vault
-        run: |
-          docker exec python-centos-container sed -i 's|mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-* 
-          docker exec python-centos-container sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-          docker exec python-centos-container yum clean all
-          docker exec python-centos-container yum makecache
+          docker run --name python-almalinux-container -d -v "${{ github.workspace }}:/workspace" -w "/workspace" almalinux:8 sleep 3600
 
       - name: 安装 Node.js 和构建工具
         run: |
-          docker exec python-centos-container yum install -y epel-release
-          docker exec python-centos-container yum install -y nodejs npm gcc gcc-c++ make
+          docker exec python-almalinux-container yum install -y epel-release
+          docker exec python-almalinux-container yum install -y nodejs npm gcc gcc-c++ make
 
       - name: 构建前端
         run: |
