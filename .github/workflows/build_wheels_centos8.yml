@@ -28,6 +28,13 @@ jobs:
         run: |
           docker run --name python-centos-container -d -v "${{ github.workspace }}:/workspace" -w "/workspace" centos:8 sleep 3600
 
+      - name: 替换 CentOS 镜像源为 Vault
+        run: |
+          docker exec python-centos-container sed -i 's|mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-* 
+          docker exec python-centos-container sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+          docker exec python-centos-container yum clean all
+          docker exec python-centos-container yum makecache
+
       - name: 安装 Node.js 和构建工具
         run: |
           docker exec python-centos-container yum install -y epel-release
