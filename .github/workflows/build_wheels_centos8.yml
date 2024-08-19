@@ -35,22 +35,22 @@ jobs:
 
       - name: 构建前端
         run: |
-          docker exec python-centos-container sh -c "cd vue-project && npm install && npm run build"
+          docker exec python-almalinux-container sh -c "cd vue-project && npm install && npm run build"
 
       - name: 安装 pyenv 和指定版本的 Python
         run: |
-          docker exec python-centos-container yum install -y git curl openssl-devel bzip2-devel zlib-devel readline-devel sqlite-devel
-          docker exec python-centos-container sh -c "curl https://pyenv.run | bash"
-          docker exec python-centos-container sh -c 'export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)" && for version in ${{ join(matrix.python-version, ' ') }}; do pyenv install $version; pyenv global $version; curl https://bootstrap.pypa.io/get-pip.py | python; done'
+          docker exec python-almalinux-container yum install -y git curl openssl-devel bzip2-devel zlib-devel readline-devel sqlite-devel
+          docker exec python-almalinux-container sh -c "curl https://pyenv.run | bash"
+          docker exec python-almalinux-container sh -c 'export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)" && for version in ${{ join(matrix.python-version, ' ') }}; do pyenv install $version; pyenv global $version; curl https://bootstrap.pypa.io/get-pip.py | python; done'
 
       - name: 安装 Rust、maturin 和 patchelf
         run: |
-          docker exec python-centos-container yum install -y rust cargo patchelf
-          docker exec python-centos-container sh -c 'export PATH="/root/.pyenv/shims:$PATH" && pip install maturin'
+          docker exec python-almalinux-container yum install -y rust cargo patchelf
+          docker exec python-almalinux-container sh -c 'export PATH="/root/.pyenv/shims:$PATH" && pip install maturin'
 
       - name: 使用 maturin 构建 wheels
         run: |
-          docker exec python-centos-container sh -c '
+          docker exec python-almalinux-container sh -c '
             export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)"
             for version in ${{ join(matrix.python-version, ' ') }}; do
               pyenv global $version
@@ -58,7 +58,7 @@ jobs:
             done'
 
       - name: 复制 wheels 到 Runner
-        run: docker cp python-centos-container:/workspace/target/wheels ./
+        run: docker cp python-almalinux-container:/workspace/target/wheels ./
 
       - name: 安装 Twine
         run: pip install twine
