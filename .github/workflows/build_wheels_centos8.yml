@@ -31,7 +31,8 @@ jobs:
       - name: 安装 Node.js 和构建工具
         run: |
           docker exec python-almalinux-container yum install -y epel-release
-          docker exec python-almalinux-container yum install -y nodejs npm gcc gcc-c++ make
+          docker exec python-almalinux-container curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+          docker exec python-almalinux-container yum install -y nodejs gcc gcc-c++ make
 
       - name: 构建前端
         run: |
