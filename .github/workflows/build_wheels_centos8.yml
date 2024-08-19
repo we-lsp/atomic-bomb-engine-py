@@ -24,19 +24,32 @@ jobs:
           repository: GiantAxeWhy/atomic-bomb-engine-front
           path: vue-project
 
+      - name: 启动 Node.js 容器
+        run: |
+          docker run --name node-container -d -v "${{ github.workspace }}:/workspace" -w "/workspace/vue-project" node:18 sleep 3600
+
+      - name: 构建前端
+        run: |
+          docker exec node-container npm install
+          docker exec node-container npm run build
+
+      - name: 复制构建结果到 Runner
+        run: |
+          docker cp node-container:/workspace/vue-project/dist ./vue-project/dist
+
+      - name: 停止并删除 Node.js 容器
+        run: |
+          docker stop node-container
+          docker rm node-container
+
       - name: 启动 AlmaLinux 容器
         run: |
           docker run --name python-almalinux-container -d -v "${{ github.workspace }}:/workspace" -w "/workspace" almalinux:8 sleep 3600
 
-      - name: 安装 Node.js 和构建工具
+      - name: 安装构建工具
         run: |
           docker exec python-almalinux-container yum install -y epel-release
-          docker exec python-almalinux-container curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
-          docker exec python-almalinux-container yum install -y nodejs gcc gcc-c++ make
-
-      - name: 构建前端
-        run: |
-          docker exec python-almalinux-container sh -c "cd vue-project && npm install && npm run build"
+          docker exec python-almalinux-container yum install -y gcc gcc-c++ make
 
       - name: 安装 pyenv 和指定版本的 Python
         run: |
