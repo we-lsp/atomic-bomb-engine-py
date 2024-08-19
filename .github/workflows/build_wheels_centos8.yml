@@ -33,14 +33,14 @@ jobs:
           docker exec node-container npm install
           docker exec node-container npm run build
 
-      - name: 确保目标目录存在
-        run: |
-          mkdir -p ./vue-project/dist
-          chmod -R 777 ./vue-project/dist
-
-      - name: 复制构建结果到 Runner
-        run: |
-          docker cp node-container:/workspace/vue-project/dist ./vue-project/dist
+#      - name: 确保目标目录存在
+#        run: |
+#          mkdir -p ./vue-project/dist
+#          chmod -R 777 ./vue-project/dist
+#
+#      - name: 复制构建结果到 Runner
+#        run: |
+#          docker cp node-container:/workspace/vue-project/dist ./vue-project/dist
 
       - name: 停止并删除 Node.js 容器
         run: |
