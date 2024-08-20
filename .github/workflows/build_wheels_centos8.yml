@@ -58,6 +58,7 @@ jobs:
           docker exec python-almalinux-container yum remove -y patchelf
           docker exec python-almalinux-container yum install -y epel-release
           docker exec python-almalinux-container yum install -y https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/p/patchelf-0.12-1.el8.x86_64.rpm
+          docker exec python-almalinux-container patchelf --version
           docker exec python-almalinux-container yum install -y rust cargo
           docker exec python-almalinux-container sh -c 'export PATH="/root/.pyenv/shims:$PATH" && pip install maturin'
 
