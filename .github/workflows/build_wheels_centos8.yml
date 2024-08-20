@@ -3,8 +3,6 @@ name: Build and publish Python wheels for CentOS 8
 on:
   push:
     branches:
-      - release
-      - release-rc.*
       - build-centos8
 
 jobs:
