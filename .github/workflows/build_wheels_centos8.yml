@@ -5,6 +5,7 @@ on:
     branches:
       - release
       - release-rc.*
+      - build-centos8
 
 jobs:
   build-wheels:
@@ -68,7 +69,7 @@ jobs:
             export PATH="/root/.pyenv/bin:$PATH" && eval "$(pyenv init --path)"
             for version in ${{ join(matrix.python-version, ' ') }}; do
               pyenv global $version
-              maturin build --release
+              maturin build --release --skip-auditwheel
             done'
 
       - name: 复制 wheels 到 Runner
