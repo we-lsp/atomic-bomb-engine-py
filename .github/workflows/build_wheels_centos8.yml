@@ -33,15 +33,6 @@ jobs:
           docker exec node-container npm install
           docker exec node-container npm run build
 
-#      - name: 确保目标目录存在
-#        run: |
-#          mkdir -p ./vue-project/dist
-#          chmod -R 777 ./vue-project/dist
-#
-#      - name: 复制构建结果到 Runner
-#        run: |
-#          docker cp node-container:/workspace/vue-project/dist ./vue-project/dist
-
       - name: 停止并删除 Node.js 容器
         run: |
           docker stop node-container
@@ -64,7 +55,10 @@ jobs:
 
       - name: 安装 Rust、maturin 和 patchelf
         run: |
-          docker exec python-almalinux-container yum install -y rust cargo patchelf
+          docker exec python-almalinux-container yum remove -y patchelf
+          docker exec python-almalinux-container yum install -y epel-release
+          docker exec python-almalinux-container yum install -y https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/p/patchelf-0.12-1.el8.x86_64.rpm
+          docker exec python-almalinux-container yum install -y rust cargo
           docker exec python-almalinux-container sh -c 'export PATH="/root/.pyenv/shims:$PATH" && pip install maturin'
 
       - name: 使用 maturin 构建 wheels
