@@ -6,7 +6,7 @@ build-backend = "maturin"
 name = "atomic_bomb_engine"
 version = "0.42.0"
 description = "使用rust开发的高性能python压测工具"
-license = { file = "LICENSE" }
+license = "MIT"
 readme = "README.md"
 repository = "https://github.com/qyzhg/atomic-bomb-engine-py"
 keywords = ["rust", "python", "binding"]
