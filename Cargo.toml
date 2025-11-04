@@ -13,21 +13,23 @@ crate-type = ["cdylib"]
 atomic-bomb-engine = "0.41.1"
 #atomic-bomb-engine = { git = "https://github.com/we-lsp/atomic-bomb-engine.git", branch = "ExponentialMovingAverage"}
 tokio = "1.36.0"
-pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime", "async-std"] }
+pyo3-async-runtimes = { version = "0.23", features = ["attributes", "tokio-runtime"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = [] }
-serde-pyobject = "0.2.1"
+serde-pyobject = "0.6.2"
 async-std = "1.12.0"
 async-stream = "0.3.5"
 futures = "0.3.30"
 tokio-stream = "0.1.15"
 anyhow = "1.0.83"
+pythonize = "0.23"
 
 [build]
 rustflags = ["-C", "target-feature=+crt-static"]
 
+
 [dependencies.pyo3]
-version = "0.20.3"
+version = "0.23.5"
 features = ["extension-module", "auto-initialize"]
 
 [tool.maturin]

@@ -1,10 +1,11 @@
 use pyo3::prelude::*;
+use pyo3::types::PyModule;
 mod py_lib;
 mod utils;
 
 #[pymodule]
 #[pyo3(name = "atomic_bomb_engine")]
-fn atomic_bomb_engine(_py: Python, m: &PyModule) -> PyResult<()> {
+fn atomic_bomb_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(
         py_lib::assert_option_func::assert_option,
         m

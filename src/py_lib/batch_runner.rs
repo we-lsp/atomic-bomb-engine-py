@@ -2,8 +2,10 @@ use crate::utils;
 use atomic_bomb_engine::models::result::BatchResult;
 use futures::stream::BoxStream;
 use futures::StreamExt;
+use pyo3::prelude::PyDictMethods;
 use pyo3::types::{PyDict, PyList};
-use pyo3::{pyclass, pymethods, PyObject, PyRefMut, PyResult, Python, ToPyObject};
+use pyo3::{pyclass, pymethods, PyObject, PyRefMut, PyResult, Python};
+use pyo3::Py;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -43,9 +45,9 @@ impl BatchRunner {
         py: Python,
         test_duration_secs: u64,
         concurrent_requests: usize,
-        api_endpoints: &PyList,
-        step_option: Option<&PyDict>,
-        setup_options: Option<&PyList>,
+        api_endpoints: Py<PyList>,
+        step_option: Option<Py<PyDict>>,
+        setup_options: Option<Py<PyList>>,
         verbose: bool,
         should_prevent: bool,
         assert_channel_buffer_size: usize,
@@ -56,7 +58,7 @@ impl BatchRunner {
         let stream_clone = self.stream.clone();
         let endpoints = utils::parse_api_endpoints::new(py, api_endpoints)
             .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))?;
-        let step_opt = utils::parse_step_options::new(step_option)
+        let step_opt = utils::parse_step_options::new(py, step_option)
             .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))?;
         let setup_opts = utils::parse_setup_options::new(py, setup_options)
             .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))?;
@@ -81,7 +83,8 @@ impl BatchRunner {
         };
 
         Python::with_gil(|py| {
-            pyo3_asyncio::tokio::future_into_py(py, fut).map(|py_any| py_any.to_object(py))
+            pyo3_async_runtimes::tokio::future_into_py(py, fut)
+                .map(|py_any| py_any.unbind())
         })
     }
 
@@ -144,24 +147,21 @@ impl BatchRunner {
                                 "throughput_per_second_kb",
                                 test_result.throughput_per_second_kb,
                             )?;
-                            let http_error_list =
-                                utils::create_http_err_dict::create_http_error_dict(
-                                    py,
-                                    &test_result.http_errors,
-                                )?;
+                            let http_error_list = utils::create_http_err_dict::create_http_error_dict(
+                                py,
+                                &test_result.http_errors,
+                            )?;
                             dict.set_item("http_errors", http_error_list)?;
-                            let assert_error_list =
-                                utils::create_assert_err_dict::create_assert_error_dict(
-                                    py,
-                                    &test_result.assert_errors,
-                                )?;
+                            let assert_error_list = utils::create_assert_err_dict::create_assert_error_dict(
+                                py,
+                                &test_result.assert_errors,
+                            )?;
                             dict.set_item("assert_errors", assert_error_list)?;
                             dict.set_item("timestamp", test_result.timestamp)?;
-                            let api_results =
-                                utils::create_api_results_dict::create_api_results_dict(
-                                    py,
-                                    test_result.api_results,
-                                )?;
+                            let api_results = utils::create_api_results_dict::create_api_results_dict(
+                                py,
+                                test_result.api_results,
+                            )?;
                             dict.set_item("api_results", api_results)?;
                             dict.set_item(
                                 "total_concurrent_number",
@@ -169,7 +169,7 @@ impl BatchRunner {
                             )?;
                             dict.set_item("errors_per_second", test_result.errors_per_second)?;
                         };
-                        Ok(Some(dict.to_object(py)))
+                        Ok(Some(dict.into_any().unbind()))
                     }
                     Some(Err(e)) => Err(pyo3::exceptions::PyRuntimeError::new_err(e.to_string())),
                     None => {
@@ -186,7 +186,7 @@ impl BatchRunner {
                 eprintln!("stream未初始化，请等待");
                 let dict = PyDict::new(py);
                 dict.set_item("should_wait", true)?;
-                Ok(Some(dict.to_object(py)))
+                Ok(Some(dict.into_any().unbind()))
             }
         }
     }

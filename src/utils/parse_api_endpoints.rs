@@ -1,236 +1,99 @@
 use crate::utils;
+use std::collections::HashMap;
+
 use atomic_bomb_engine::models;
 use atomic_bomb_engine::models::api_endpoint::ThinkTime;
 use atomic_bomb_engine::models::assert_option::AssertOption;
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyAnyMethods, PyDict, PyList, PyListMethods};
+use pythonize::depythonize;
 use serde_json::Value;
-use serde_pyobject::from_pyobject;
-use std::collections::HashMap;
 
-pub fn new(py: Python, api_endpoints: &PyList) -> PyResult<Vec<models::api_endpoint::ApiEndpoint>> {
+pub fn new(py: Python<'_>, api_endpoints: Py<PyList>) -> PyResult<Vec<models::api_endpoint::ApiEndpoint>> {
     let mut endpoints: Vec<models::api_endpoint::ApiEndpoint> = Vec::new();
-    for item in api_endpoints.iter() {
-        if let Ok(dict) = item.downcast::<PyDict>() {
-            let name: String = match dict.get_item("name") {
-                Ok(name) => match name {
-                    None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "name不能为空".to_string(),
-                        ))
-                    }
-                    Some(name) => name.to_string(),
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
+    let bound_list = api_endpoints.bind(py);
+    for item in bound_list.iter() {
+        let dict = item.downcast::<PyDict>()?;
 
-            let url: String = match dict.get_item("url") {
-                Ok(url) => match url {
-                    None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "url不能为空".to_string(),
-                        ))
-                    }
-                    Some(url) => url.to_string(),
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
+        let name: String = dict
+            .get_item("name")?
+            .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("name不能为空".to_string()))?
+            .extract()?;
 
-            let method: String = match dict.get_item("method") {
-                Ok(method) => match method {
-                    None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "method不能为空".to_string(),
-                        ))
-                    }
-                    Some(method) => method.to_string(),
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
+        let url: String = dict
+            .get_item("url")?
+            .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("url不能为空".to_string()))?
+            .extract()?;
 
-            let weight: u32 = match dict.get_item("weight") {
-                Ok(weight) => match weight {
-                    None => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                            "weight不能为空".to_string(),
-                        ))
-                    }
-                    Some(weight) => weight.to_string().parse()?,
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
+        let method: String = dict
+            .get_item("method")?
+            .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("method不能为空".to_string()))?
+            .extract()?;
 
-            let json_obj: PyObject = dict.get_item("json").unwrap().to_object(py);
-            let json: Option<Value> = match from_pyobject(json_obj.as_ref(py)) {
-                Ok(val) => val,
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
+        let weight: u32 = dict
+            .get_item("weight")?
+            .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("weight不能为空".to_string()))?
+            .extract()?;
 
-            let form_data_obj: PyObject = dict.get_item("form_data").unwrap().to_object(py);
-            let form_data: Option<HashMap<String, String>> =
-                match from_pyobject(form_data_obj.as_ref(py)) {
-                    Ok(val) => val,
-                    Err(e) => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                            "Error: {:?}",
-                            e
-                        )))
-                    }
-                };
+        let json: Option<Value> = dict
+            .get_item("json")?
+            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .transpose()?;
 
-            let headers_obj: PyObject = dict.get_item("headers").unwrap().to_object(py);
-            let headers: Option<HashMap<String, String>> =
-                match from_pyobject(headers_obj.as_ref(py)) {
-                    Ok(val) => val,
-                    Err(e) => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                            "Error: {:?}",
-                            e
-                        )))
-                    }
-                };
+        let form_data: Option<HashMap<String, String>> = dict
+            .get_item("form_data")?
+            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .transpose()?;
 
-            let cookies_obj: PyObject = dict.get_item("cookies").unwrap().to_object(py);
-            let cookies: Option<String> = match from_pyobject(cookies_obj.as_ref(py)) {
-                Ok(val) => val,
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
+        let headers: Option<HashMap<String, String>> = dict
+            .get_item("headers")?
+            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .transpose()?;
 
-            let assert_options: Option<Vec<AssertOption>> = match dict.get_item("assert_options") {
-                Ok(op_py_any) => match op_py_any {
-                    None => None,
-                    Some(py_any) => {
-                        let pyobj = py_any.to_object(py);
-                        match from_pyobject(pyobj.as_ref(py)) {
-                            Ok(val) => val,
-                            Err(e) => {
-                                return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                                    format!("Error: {:?}", e),
-                                ))
-                            }
-                        }
-                    }
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
+        let cookies: Option<String> = dict
+            .get_item("cookies")?
+            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .transpose()?;
 
-            let think_time_option: Option<ThinkTime> = match dict.get_item("think_time_option") {
-                Ok(op_py_any) => match op_py_any {
-                    None => None,
-                    Some(py_any) => {
-                        let pyobj = py_any.to_object(py);
-                        match from_pyobject(pyobj.as_ref(py)) {
-                            Ok(val) => val,
-                            Err(e) => {
-                                return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                                    format!("Error: {:?}", e),
-                                ))
-                            }
-                        }
-                    }
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
-            let setup_options_pylist: Option<&PyList> = match dict.get_item("setup_options") {
-                Ok(opts) => match opts {
-                    None => None,
-                    Some(py_any) => match py_any.extract::<&PyList>() {
-                        Ok(py_list) => Some(py_list),
-                        Err(e) => {
-                            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                                "Error: {:?}",
-                                e
-                            )))
-                        }
-                    },
-                },
-                Err(e) => {
-                    return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                        "Error: {:?}",
-                        e
-                    )))
-                }
-            };
-            let setup_options = utils::parse_setup_options::new(py, setup_options_pylist)?;
+        let assert_options: Option<Vec<AssertOption>> = dict
+            .get_item("assert_options")?
+            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .transpose()?;
 
-            let multipart_options_pylist: Option<&PyList> =
-                match dict.get_item("multipart_options") {
-                    Ok(opts) => match opts {
-                        None => None,
-                        Some(py_any) => match py_any.extract::<&PyList>() {
-                            Ok(py_list) => Some(py_list),
-                            Err(e) => {
-                                return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                                    format!("Error: {:?}", e),
-                                ))
-                            }
-                        },
-                    },
-                    Err(e) => {
-                        return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                            "Error: {:?}",
-                            e
-                        )))
-                    }
-                };
-            let multipart_options =
-                utils::parse_multipart_options::new(py, multipart_options_pylist)?;
+        let think_time_option: Option<ThinkTime> = dict
+            .get_item("think_time_option")?
+            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .transpose()?;
 
-            endpoints.push(models::api_endpoint::ApiEndpoint {
-                name,
-                url,
-                method,
-                weight,
-                json,
-                form_data,
-                multipart_options,
-                headers,
-                cookies,
-                assert_options,
-                think_time_option,
-                setup_options,
-            });
-        }
+        let setup_options = dict
+            .get_item("setup_options")?
+            .map(|value| value.extract::<Py<PyList>>())
+            .transpose()?;
+
+        let setup_options = utils::parse_setup_options::new(py, setup_options)?;
+
+        let multipart_options = dict
+            .get_item("multipart_options")?
+            .map(|value| value.extract::<Py<PyList>>())
+            .transpose()?;
+
+        let multipart_options = utils::parse_multipart_options::new(py, multipart_options)?;
+
+        endpoints.push(models::api_endpoint::ApiEndpoint {
+            name,
+            url,
+            method,
+            weight,
+            json,
+            form_data,
+            multipart_options,
+            headers,
+            cookies,
+            assert_options,
+            think_time_option,
+            setup_options,
+        });
     }
     Ok(endpoints)
 }

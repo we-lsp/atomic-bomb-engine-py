@@ -1,5 +1,6 @@
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyObject, PyResult, Python};
+use pyo3::prelude::PyDictMethods;
 
 #[pyfunction]
 #[pyo3(signature=(
@@ -20,10 +21,10 @@ pub(crate) fn setup_option(
     method: String,
     json: Option<PyObject>,
     form_data: Option<PyObject>,
-    multipart_options: Option<&PyList>,
+    multipart_options: Option<PyObject>,
     headers: Option<PyObject>,
     cookies: Option<String>,
-    jsonpath_extract: Option<&PyList>,
+    jsonpath_extract: Option<PyObject>,
 ) -> PyResult<PyObject> {
     let dict = PyDict::new(py);
     dict.set_item("name", name)?;

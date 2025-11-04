@@ -1,5 +1,6 @@
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyObject, PyResult, Python};
+use pyo3::prelude::PyDictMethods;
 
 #[pyfunction]
 #[pyo3(signature=(
@@ -24,12 +25,12 @@ pub(crate) fn endpoint(
     weight: u32,
     json: Option<PyObject>,
     form_data: Option<PyObject>,
-    multipart_options: Option<&PyList>,
+    multipart_options: Option<PyObject>,
     headers: Option<PyObject>,
     cookies: Option<String>,
-    assert_options: Option<&PyList>,
+    assert_options: Option<PyObject>,
     think_time_option: Option<PyObject>,
-    setup_options: Option<&PyList>,
+    setup_options: Option<PyObject>,
 ) -> PyResult<PyObject> {
     let dict = PyDict::new(py);
     dict.set_item("name", name)?;

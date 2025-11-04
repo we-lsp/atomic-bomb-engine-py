@@ -1,5 +1,6 @@
 use pyo3::types::PyDict;
-use pyo3::{pyfunction, PyObject, PyResult, Python, ToPyObject};
+use pyo3::{pyfunction, PyObject, PyResult, Python};
+use pyo3::prelude::PyDictMethods;
 
 #[pyfunction]
 #[pyo3(signature=(
@@ -14,5 +15,5 @@ pub(crate) fn step_option(
     let dict = PyDict::new(py);
     dict.set_item("increase_step", increase_step)?;
     dict.set_item("increase_interval", increase_interval)?;
-    Ok(dict.to_object(py))
+    Ok(dict.into_any().unbind())
 }

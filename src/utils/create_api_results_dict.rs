@@ -1,12 +1,14 @@
 use atomic_bomb_engine::models::result::ApiResult;
+use pyo3::prelude::PyDictMethods;
 use pyo3::types::{PyDict, PyList};
-use pyo3::{PyResult, Python};
-pub fn create_api_results_dict(py: Python, api_results: Vec<ApiResult>) -> PyResult<&PyList> {
+use pyo3::{Py, PyResult, Python};
+
+pub fn create_api_results_dict(py: Python<'_>, api_results: Vec<ApiResult>) -> PyResult<Py<PyList>> {
     if api_results.is_empty() {
-        return Ok(PyList::empty(py));
+        return Ok(PyList::empty(py).unbind());
     }
 
-    let mut results = Vec::new();
+    let mut results: Vec<Py<PyDict>> = Vec::with_capacity(api_results.len());
 
     for result in api_results {
         let res_dict = PyDict::new(py);
@@ -29,7 +31,9 @@ pub fn create_api_results_dict(py: Python, api_results: Vec<ApiResult>) -> PyRes
         res_dict.set_item("total_data_kb", result.total_data_kb)?;
         res_dict.set_item("throughput_per_second_kb", result.throughput_per_second_kb)?;
         res_dict.set_item("concurrent_number", result.concurrent_number)?;
-        results.push(res_dict)
+
+        results.push(res_dict.unbind());
     }
-    Ok(PyList::new(py, results))
+
+    Ok(PyList::new(py, results)?.unbind())
 }
