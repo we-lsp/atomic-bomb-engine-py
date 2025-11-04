@@ -1,52 +1,37 @@
 use atomic_bomb_engine::models;
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyAnyMethods, PyDict, PyList, PyListMethods};
+use pythonize::depythonize;
 use serde_json::Value;
-use serde_pyobject::from_pyobject;
 
 pub fn _new(
-    py: Python,
-    assert_options: Option<&PyList>,
+    py: Python<'_>,
+    assert_options: Option<Py<PyList>>,
 ) -> PyResult<Option<Vec<models::assert_option::AssertOption>>> {
     match assert_options {
         None => Ok(None),
         Some(ops_list) => {
-            let mut ops: Vec<models::assert_option::AssertOption> = Vec::new();
-            for item in ops_list.iter() {
-                if let Ok(dict) = item.downcast::<PyDict>() {
-                    let jsonpath: String = match dict.get_item("jsonpath") {
-                        Ok(json_path_option) => match json_path_option {
-                            None => {
-                                return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                                    "必须输入一个jsonpath".to_string(),
-                                ))
-                            }
-                            Some(jsonpath) => jsonpath.to_string(),
-                        },
-                        Err(e) => {
-                            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                                "Error: {:?}",
-                                e
-                            )))
-                        }
-                    };
+            let list = ops_list.bind(py);
+            let mut ops: Vec<models::assert_option::AssertOption> = Vec::with_capacity(list.len());
+            for item in list.iter() {
+                let dict = item.downcast::<PyDict>()?;
+                let jsonpath: String = dict
+                    .get_item("jsonpath")?
+                    .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("必须输入一个jsonpath".to_string()))?
+                    .extract()?;
 
-                    let reference_object: PyObject =
-                        dict.get_item("reference_object").unwrap().to_object(py);
-                    let reference_value: Value = match from_pyobject(reference_object.as_ref(py)) {
-                        Ok(val) => val,
-                        Err(e) => {
-                            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
-                                "Error: {:?}",
-                                e
-                            )))
-                        }
-                    };
-                    ops.push(models::assert_option::AssertOption {
-                        jsonpath,
-                        reference_object: reference_value,
-                    });
-                }
+                let reference_value = dict
+                    .get_item("reference_object")?
+                    .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("必须输入一个reference_object".to_string()))?;
+                let reference_object: Value = depythonize(&reference_value).map_err(|e| {
+                    PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))
+                })?;
+
+                ops.push(models::assert_option::AssertOption {
+                    jsonpath,
+                    reference_object,
+                });
             }
             Ok(Some(ops))
         }

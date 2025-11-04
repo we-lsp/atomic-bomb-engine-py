@@ -1,5 +1,6 @@
 use pyo3::types::PyDict;
 use pyo3::{pyfunction, PyObject, PyResult, Python};
+use pyo3::prelude::PyDictMethods;
 
 #[pyfunction]
 #[pyo3(signature=(

@@ -2,11 +2,13 @@ use atomic_bomb_engine::models;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
-pub fn new(step_option: Option<&PyDict>) -> PyResult<Option<models::step_option::StepOption>> {
+pub fn new(py: Python, step_option: Option<Py<PyDict>>) -> PyResult<Option<models::step_option::StepOption>> {
     match step_option {
         None => Ok(None),
         Some(ops_dict) => {
-            let increase_step: usize = match ops_dict.get_item("increase_step") {
+            let dict_ref = ops_dict.bind(py);
+
+            let increase_step: usize = match dict_ref.get_item("increase_step") {
                 Ok(increase_step_py_any) => match increase_step_py_any {
                     None => {
                         return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
@@ -33,7 +35,7 @@ pub fn new(step_option: Option<&PyDict>) -> PyResult<Option<models::step_option:
                 }
             };
 
-            let increase_interval: u64 = match ops_dict.get_item("increase_interval") {
+            let increase_interval: u64 = match dict_ref.get_item("increase_interval") {
                 Ok(increase_interval_py_any) => match increase_interval_py_any {
                     None => {
                         return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(

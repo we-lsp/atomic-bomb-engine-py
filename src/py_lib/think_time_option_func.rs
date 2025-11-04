@@ -1,5 +1,6 @@
 use pyo3::types::PyDict;
-use pyo3::{pyfunction, PyObject, PyResult, Python, ToPyObject};
+use pyo3::{pyfunction, PyObject, PyResult, Python};
+use pyo3::prelude::PyDictMethods;
 
 #[pyfunction]
 #[pyo3(signature=(
@@ -14,5 +15,5 @@ pub(crate) fn think_time_option(
     let dict = PyDict::new(py);
     dict.set_item("min_millis", min_millis)?;
     dict.set_item("max_millis", max_millis)?;
-    Ok(dict.to_object(py))
+    Ok(dict.into_any().unbind())
 }
