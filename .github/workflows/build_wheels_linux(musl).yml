@@ -72,9 +72,15 @@ jobs:
                   for info in src.infolist():
                       data = src.read(info.filename)
                       if info.filename.endswith(".dist-info/METADATA"):
-                          lines = data.decode("utf-8").splitlines()
-                          lines = [line for line in lines if not line.lower().startswith("license-file:")]
-                          data = ("\n".join(lines) + "\n").encode("utf-8")
+                          text = data.decode("utf-8")
+                          new_lines = []
+                          skip = False
+                          for line in text.splitlines():
+                              lower = line.lower()
+                              if lower.startswith("license-file:") or lower.startswith("license-expression:"):
+                                  continue
+                              new_lines.append(line)
+                          data = ("\n".join(new_lines) + "\n").encode("utf-8")
                       dst.writestr(info, data)
               tmp_path.replace(wheel_path)
           PY
