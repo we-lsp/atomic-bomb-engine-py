@@ -2,9 +2,8 @@ use crate::utils;
 use atomic_bomb_engine::models::result::BatchResult;
 use futures::stream::BoxStream;
 use futures::StreamExt;
-use pyo3::types::{PyDict, PyDictMethods, PyList};
-use pyo3::{pyclass, pymethods, PyObject, PyRefMut, PyResult, Python};
-use pyo3::Py;
+use pyo3::types::{PyAny, PyDict, PyDictMethods, PyList};
+use pyo3::{pyclass, pymethods, Py, PyRefMut, PyResult, Python};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -53,7 +52,7 @@ impl BatchRunner {
         timeout_secs: u64,
         cookie_store_enable: bool,
         ema_alpha: f64,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let stream_clone = self.stream.clone();
         let endpoints = utils::parse_api_endpoints::new(py, api_endpoints)
             .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))?;
@@ -91,7 +90,7 @@ impl BatchRunner {
         Ok(slf)
     }
 
-    fn __next__(slf: PyRefMut<'_, Self>, py: Python) -> PyResult<Option<PyObject>> {
+    fn __next__(slf: PyRefMut<'_, Self>, py: Python) -> PyResult<Option<Py<PyAny>>> {
         let is_done_clone = slf.is_done.clone();
 
         let mut stream_guard = slf.runtime.block_on(async {
