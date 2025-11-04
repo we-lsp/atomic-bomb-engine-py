@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "atomic_bomb_engine"
-version = "0.41.3"
+version = "0.42.0"
 description = "使用rust开发的高性能python压测工具"
 license = "MIT"
 readme = "README.md"
@@ -13,7 +13,6 @@ keywords = ["rust", "python", "binding"]
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

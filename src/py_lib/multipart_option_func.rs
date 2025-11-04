@@ -1,6 +1,5 @@
-use pyo3::types::PyDict;
-use pyo3::{pyfunction, PyObject, PyResult, Python};
-use pyo3::prelude::PyDictMethods;
+use pyo3::types::{PyAny, PyDict, PyDictMethods};
+use pyo3::{pyfunction, Py, PyResult, Python};
 
 #[pyfunction]
 #[pyo3(signature=(
@@ -15,11 +14,11 @@ pub(crate) fn multipart_option(
     path: String,
     file_name: String,
     mime: String,
-) -> PyResult<PyObject> {
+) -> PyResult<Py<PyAny>> {
     let dict = PyDict::new(py);
     dict.set_item("form_key", form_key)?;
     dict.set_item("path", path)?;
     dict.set_item("file_name", file_name)?;
     dict.set_item("mime", mime)?;
-    Ok(dict.into())
+    Ok(dict.into_any().unbind())
 }

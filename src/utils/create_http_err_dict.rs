@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
 use atomic_bomb_engine::models::http_error_stats::HttpErrKey;
-use pyo3::prelude::PyDictMethods;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyDict, PyDictMethods, PyList};
 use pyo3::{Py, PyResult, Python};
 
 pub fn create_http_error_dict(

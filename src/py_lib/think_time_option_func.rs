@@ -1,6 +1,5 @@
-use pyo3::types::PyDict;
-use pyo3::{pyfunction, PyObject, PyResult, Python};
-use pyo3::prelude::PyDictMethods;
+use pyo3::types::{PyAny, PyDict, PyDictMethods};
+use pyo3::{pyfunction, Py, PyResult, Python};
 
 #[pyfunction]
 #[pyo3(signature=(
@@ -11,7 +10,7 @@ pub(crate) fn think_time_option(
     py: Python,
     min_millis: u64,
     max_millis: u64,
-) -> PyResult<PyObject> {
+) -> PyResult<Py<PyAny>> {
     let dict = PyDict::new(py);
     dict.set_item("min_millis", min_millis)?;
     dict.set_item("max_millis", max_millis)?;

@@ -1,4 +1,5 @@
 use crate::utils;
+use crate::utils::depythonize::depythonize;
 use std::collections::HashMap;
 
 use atomic_bomb_engine::models;
@@ -6,15 +7,17 @@ use atomic_bomb_engine::models::api_endpoint::ThinkTime;
 use atomic_bomb_engine::models::assert_option::AssertOption;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyAnyMethods, PyDict, PyList, PyListMethods};
-use pythonize::depythonize;
+use pyo3::types::{PyDict, PyList, PyListMethods};
 use serde_json::Value;
 
-pub fn new(py: Python<'_>, api_endpoints: Py<PyList>) -> PyResult<Vec<models::api_endpoint::ApiEndpoint>> {
+pub fn new(
+    py: Python<'_>,
+    api_endpoints: Py<PyList>,
+) -> PyResult<Vec<models::api_endpoint::ApiEndpoint>> {
     let mut endpoints: Vec<models::api_endpoint::ApiEndpoint> = Vec::new();
     let bound_list = api_endpoints.bind(py);
     for item in bound_list.iter() {
-        let dict = item.downcast::<PyDict>()?;
+        let dict = item.cast::<PyDict>()?;
 
         let name: String = dict
             .get_item("name")?
@@ -38,47 +41,48 @@ pub fn new(py: Python<'_>, api_endpoints: Py<PyList>) -> PyResult<Vec<models::ap
 
         let json: Option<Value> = dict
             .get_item("json")?
-            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .map(|value| depythonize(&value))
             .transpose()?;
 
         let form_data: Option<HashMap<String, String>> = dict
             .get_item("form_data")?
-            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .map(|value| depythonize(&value))
             .transpose()?;
 
         let headers: Option<HashMap<String, String>> = dict
             .get_item("headers")?
-            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .map(|value| depythonize(&value))
             .transpose()?;
 
         let cookies: Option<String> = dict
             .get_item("cookies")?
-            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .map(|value| depythonize(&value))
             .transpose()?;
 
         let assert_options: Option<Vec<AssertOption>> = dict
             .get_item("assert_options")?
-            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .map(|value| depythonize(&value))
             .transpose()?;
 
         let think_time_option: Option<ThinkTime> = dict
             .get_item("think_time_option")?
-            .map(|value| depythonize(&value).map_err(|e| PyErr::new::<PyRuntimeError, _>(format!("Error: {:?}", e))))
+            .map(|value| depythonize(&value))
             .transpose()?;
 
-        let setup_options = dict
-            .get_item("setup_options")?
-            .map(|value| value.extract::<Py<PyList>>())
-            .transpose()?;
+        let setup_options_py = match dict.get_item("setup_options")? {
+            Some(value) => Some(value.extract::<Py<PyList>>()?),
+            None => None,
+        };
 
-        let setup_options = utils::parse_setup_options::new(py, setup_options)?;
+        let setup_options = utils::parse_setup_options::new(py, setup_options_py)?;
 
-        let multipart_options = dict
-            .get_item("multipart_options")?
-            .map(|value| value.extract::<Py<PyList>>())
-            .transpose()?;
+        let multipart_options_py = match dict.get_item("multipart_options")? {
+            Some(value) => Some(value.extract::<Py<PyList>>()?),
+            None => None,
+        };
 
-        let multipart_options = utils::parse_multipart_options::new(py, multipart_options)?;
+        let multipart_options =
+            utils::parse_multipart_options::new(py, multipart_options_py)?;
 
         endpoints.push(models::api_endpoint::ApiEndpoint {
             name,
