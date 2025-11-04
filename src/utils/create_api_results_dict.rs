@@ -1,6 +1,5 @@
 use atomic_bomb_engine::models::result::ApiResult;
-use pyo3::prelude::PyDictMethods;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyDict, PyDictMethods, PyList};
 use pyo3::{Py, PyResult, Python};
 
 pub fn create_api_results_dict(py: Python<'_>, api_results: Vec<ApiResult>) -> PyResult<Py<PyList>> {

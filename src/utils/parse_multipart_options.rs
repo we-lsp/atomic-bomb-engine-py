@@ -1,7 +1,7 @@
 use atomic_bomb_engine::models;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyAnyMethods, PyDict, PyList, PyListMethods};
+use pyo3::types::{PyDict, PyList, PyListMethods};
 
 pub fn new(
     py: Python<'_>,
@@ -15,11 +15,13 @@ pub fn new(
                 Vec::with_capacity(list.len());
 
             for item in list.iter() {
-                let dict = item.downcast::<PyDict>()?;
+                let dict = item.cast::<PyDict>()?;
 
                 let form_key: String = dict
                     .get_item("form_key")?
-                    .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("form_key 不能为空".to_string()))?
+                    .ok_or_else(|| {
+                        PyErr::new::<PyRuntimeError, _>("form_key 不能为空".to_string())
+                    })?
                     .extract()?;
 
                 let path: String = dict
@@ -29,7 +31,9 @@ pub fn new(
 
                 let file_name: String = dict
                     .get_item("file_name")?
-                    .ok_or_else(|| PyErr::new::<PyRuntimeError, _>("file_name 不能为空".to_string()))?
+                    .ok_or_else(|| {
+                        PyErr::new::<PyRuntimeError, _>("file_name 不能为空".to_string())
+                    })?
                     .extract()?;
 
                 let mime: String = dict
