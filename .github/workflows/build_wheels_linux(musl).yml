@@ -59,6 +59,26 @@ jobs:
       - name: 复制 wheels 到 Runner
         run: docker cp python-alpine-container:/__w/target/wheels ./
 
+      - name: 去除不兼容的 License 元数据
+        run: |
+          python - <<'PY'
+          import pathlib
+          import zipfile
+
+          wheels_dir = pathlib.Path("wheels")
+          for wheel_path in wheels_dir.glob("*.whl"):
+              tmp_path = wheel_path.with_suffix(".tmp")
+              with zipfile.ZipFile(wheel_path) as src, zipfile.ZipFile(tmp_path, "w") as dst:
+                  for info in src.infolist():
+                      data = src.read(info.filename)
+                      if info.filename.endswith(".dist-info/METADATA"):
+                          lines = data.decode("utf-8").splitlines()
+                          lines = [line for line in lines if not line.lower().startswith("license-file:")]
+                          data = ("\n".join(lines) + "\n").encode("utf-8")
+                      dst.writestr(info, data)
+              tmp_path.replace(wheel_path)
+          PY
+
       - name: 安装 Twine
         run: pip install twine
 
